@@ -11,20 +11,20 @@ import mass.calibration.hci_models
 import lmfit
 
 #Laptop
-filename = r"C:\Users\Grant Mondeel\Box\my EUV\tes\realtime\realtime\Spring2024\OffFiles\20181205_chan1.off"
+#filename = r"C:\Users\Grant Mondeel\Box\my EUV\tes\realtime\realtime\Spring2024\OffFiles\20181205_chan1.off"
 
 #PC
-#filename = r"C:\Users\lamat\Box\my EUV\tes\realtime\realtime\Spring2024\OffFiles\20181205_chan1.off"
+filename = r"C:\Users\lamat\Box\CfA\TES\Ne-Like\20240723_off\0000\20240723_run0000_chan1.off"
 
 plt.ion()
-data = ChannelGroup(getOffFileListFromOneFile(filename, maxChans=999), verbose=True, channelClass = Channel, excludeStates=['START','A'])
-data.setDefaultBinsize(0.3)
+data = ChannelGroup(getOffFileListFromOneFile(filename, maxChans=999), verbose=True, channelClass = Channel, excludeStates=['A', 'IGNORE', 'STOP'])
+data.setDefaultBinsize(.3)
 mass.line_models.VALIDATE_BIN_SIZE = False ###with Galen's cal, had to go down to 0.025eV bins...
 ds = data.firstGoodChannel()
 #data.setOutputDir(baseDir=baseOutputDirectory, deleteAndRecreate=False)
 
 ###Some residual based cuts
-#data.learnResidualStdDevCut() #for some reason, this erases the majority of the pulses since the off files aren't good
+#data.learnResidualStdDevCut() #see if this is works
 
 ###view some pulses
 # off = mass.off.OffFile(filename)
@@ -43,9 +43,28 @@ ds = data.firstGoodChannel()
 # plt.ylabel("reconstructed signal (arbs)")
 # plt.title("example reconstructed pulse")
 
+#Optional: assignes names to the states based on what was being observed
+data.experimentStateFile.aliasState("START", "Cal")
+data.experimentStateFile.aliasState("B", "W 1")
+data.experimentStateFile.aliasState("D", "W 2")
+data.experimentStateFile.aliasState("E", "Re 1")
+data.experimentStateFile.aliasState("F", "Re 2")
+data.experimentStateFile.aliasState("G", "Os 1")
+
+
+#Make a dictionary with lists of aliases for each element.
+#Pass this anywhere with the 'states=None' argument, e.g., data.plotHist(..., states=statesDict["W"])
+statesDict = {
+    "W"  : ["W 1", "W 2"],
+    "Re" : ["Re 1", "Re 2"],
+    "Os" : ["Os 1"],
+    "Cal": ["Cal"],
+    "CalOn": ["Cal", "Re 1", "Re 2", "W 2", "Os 1"] #states where the calibration source was turned on
+}
+
 
 ###view filtValue plot
-#data[93].plotHist(np.arange(0,13000,10), "filtValue", coAddStates=False)
+data[1].plotHist(np.arange(0,55000,10), "filtValue", coAddStates=False, states="Cal")
 
 ###Check how many pulses are in the data file
 # totalPulses = 0
@@ -54,16 +73,6 @@ ds = data.firstGoodChannel()
 #     totalPulses += len(data[chan].getAttr('filtValue', 'I'))
 # print("Combining all channels gives",totalPulses,"pulses.")
 
-
-#Optional: assignes names to the states based on what was being observed
-data.experimentStateFile.aliasState("B", "Ne")
-data.experimentStateFile.aliasState("C", "W 1")
-data.experimentStateFile.aliasState("D", "Os")
-data.experimentStateFile.aliasState("E", "Ar")
-data.experimentStateFile.aliasState("F", "Re")
-data.experimentStateFile.aliasState("G", "W 2")
-data.experimentStateFile.aliasState("H", "CO2")
-data.experimentStateFile.aliasState("I", "Ir")
 
 ## Galen's full-spectrum energy calibration
 if False:
@@ -102,89 +111,39 @@ if False:
 
 def getEnergy(lineName):
     return mass.getmodel(lineName).spect.nominal_peak_energy
-def getPH(lineName):
+def getPH(lineName): #See lines with mass.spectra and mass.STANDARD_FEATURES
     energy=getEnergy(lineName)
     return ds.recipes['energy'].f.energy2ph(energy)
-#Custom line ratios of O He-Like 1s2s+1s2p WXYZ region. Only using W Z separately and XY blended into one.
-mass.calibration.fluorescence_lines.addline(
-    element="O",
-    material="Highly Charged Ion",
-    linetype=" He-Like 1s2s+1s2p Ir",
-    reference_short='NIST ASD',
-    fitter_type=mass.calibration.fluorescence_lines.line_models.GenericLineModel,
-    reference_plot_instrument_gaussian_fwhm=0.5,
-    nominal_peak_energy=573.94777,
-    energies=np.array([560.983, 568.551, 573.94777]), lorentzian_fwhm=np.array([0.1, 0.1, 0.1]),
-    reference_amplitude=np.array([120, 77, 1000]),
-    reference_amplitude_type=mass.calibration.fluorescence_lines.LORENTZIAN_PEAK_HEIGHT,
-    ka12_energy_diff=None,
-    reference_measurement_type="Experiment"
-)
-mass.calibration.fluorescence_lines.addline(
-    element="O",
-    material="Highly Charged Ion",
-    linetype=" He-Like 1s2s+1s2p CO2",
-    reference_short='NIST ASD',
-    fitter_type=mass.calibration.fluorescence_lines.line_models.GenericLineModel,
-    reference_plot_instrument_gaussian_fwhm=0.5,
-    nominal_peak_energy=573.94777,
-    energies=np.array([560.983, 568.551, 573.94777]), lorentzian_fwhm=np.array([0.1, 0.1, 0.1]),
-    reference_amplitude=np.array([77, 120, 1000]),
-    reference_amplitude_type=mass.calibration.fluorescence_lines.LORENTZIAN_PEAK_HEIGHT,
-    ka12_energy_diff=None,
-    reference_measurement_type="Experiment"
-)
-mass.calibration.fluorescence_lines.addline(
-    element="O",
-    material="Highly Charged Ion",
-    linetype=" He-Like 1s2s+1s2p Total",
-    reference_short='NIST ASD',
-    fitter_type=mass.calibration.fluorescence_lines.line_models.GenericLineModel,
-    reference_plot_instrument_gaussian_fwhm=0.5,
-    nominal_peak_energy=573.94777,
-    energies=np.array([560.983, 568.551, 573.94777]), lorentzian_fwhm=np.array([0.1, 0.1, 0.1]),
-    reference_amplitude=np.array([88, 134, 1000]),
-    reference_amplitude_type=mass.calibration.fluorescence_lines.LORENTZIAN_PEAK_HEIGHT,
-    ka12_energy_diff=None,
-    reference_measurement_type="Experiment"
-)
-#ds.recipes['energy'].f.energy2ph ## convert energy to pulse height from the calibration energy result named "energy"
-## *.rowcount -> *.subframecount in massGui
+#Sc_keys = [k for k in mass.STANDARD_FEATURES.keys() if 'Sc' in k]
 
-#See lines with mass.spectra and mass.STANDARD_MODELS
-## Build a narrow-range calibration from Dr. Takacs' line IDs
 if True:
-    # ###for ch55, looked good but only has 1 count in CO2 for 1s4p
-    ## we can still try using all of these lines for the fit.
-    ds=data[55]
+    #ds=data[55]
     ds.calibrationPlanInit("filtValue")
-    #ds.calibrationPlanAddPoint(2064, "O He-Like 1s2s+1s2p", states=["CO2","Ir"]) #this model has the wrong intensity ratios for this dataset
+
+    ds.calibrationPlanAddPoint(6025, "AlKAlpha", states=statesDict["Cal"]) #guess
+    #ds.calibrationPlanAddPoint(6167, "ScKL3", states=statesDict["Cal"])
+    # ds.calibrationPlanAddPoint(7035, "VKAlpha", states=statesDict["Cal"])
+    # ds.calibrationPlanAddPoint(8725, "MnKAlpha", states=statesDict["Cal"])
+    # ds.calibrationPlanAddPoint(8725, "MnKAlpha", states=statesDict["Cal"])
+    ds.calibrationPlanAddPoint(43265, "ZnKAlpha", states=statesDict["Cal"])
+    ds.calibrationPlanAddPoint(48065, "GeKAlpha", states=statesDict["Cal"])
     
-    #ds.calibrationPlanAddPoint(2016, "O7 1s.2s 3S J=1", states=["CO2", "Ir"]) #W line
-    #ds.calibrationPlanAddPoint(2063, "O He-Like 1s2p 1P1", states=["CO2", "Ir"]) #Fitting the Z line (strongest, but blended)
-    #ds.calibrationPlanAddPoint(2064, "O He-Like 1s2s+1s2p CO2", states="CO2") #Grant's custom model
-    #ds.calibrationPlanAddPoint(2064, "O He-Like 1s2s+1s2p Ir", states="Ir") #Grant's custom model
-    ds.calibrationPlanAddPoint(2064, "O He-Like 1s2s+1s2p Total", states=["CO2", "Ir"])
-    ds.calibrationPlanAddPoint(2350, "O H-Like 2p", states=["CO2", "Ir"])
-    #ds.calibrationPlanAddPoint(2385, "O7 1s.3p 3P* J=1", states="CO2") ##These lines are present but have low counts
-    #ds.calibrationPlanAddPoint(2501, "O He-Like 1s4p 1P1", states="CO2") ##These lines are present but have low counts
-    #ds.calibrationPlanAddPoint(2558, "O7 1s.5p 3P* J=2", states="CO2") ##These lines are present but have low counts
-    ds.calibrationPlanAddPoint(2778, "O H-Like 3p", states=["CO2", "Ir"])
-    #ds.calibrationPlanAddPoint(2926, "O H-Like 4p", states=["CO2","Ir"]) ##These lines are present but have low counts
-    ds.calibrationPlanAddPoint(2990, "O8 5p 2P* J=1/2", states=["CO2","Ir"]) ##These lines are present but have low counts
-    ds.calibrationPlanAddPoint(3293, "Ne He-Like 1s2s+1s2p", states="Ne")
-    ds.calibrationPlanAddPoint(3642, "Ne H-Like 2p", states="Ne")
 
+    ds.calibrateFollowingPlan("filtValue", calibratedName="energy", dlo=50, dhi=50, approximate=False, overwriteRecipe=True)
+    ds.diagnoseCalibration()
+
+    assert 0
+    
     data.alignToReferenceChannel(referenceChannel=ds,
-                                binEdges=np.arange(500, 20000, 3), attr="filtValue")#, _rethrow=True)
+                                binEdges=np.arange(3000, 60000, 3), attr="filtValue")#, _rethrow=True)
     data.cutAdd("cutForLearnDC", lambda energyRough: np.logical_and(
-    energyRough > 500, energyRough < 670), setDefault=False) #For Ir, we will focus on ~620eV on state I.
+    energyRough > 8000, energyRough < 13000), setDefault=False) #For Ir, we will focus on ~620eV on state I.
 
-    ### Mass corrections. Phase correct appears to lower resolution and causes Ne 1s2s+1s2p to be off by ~2 eV, so I don't use it
-    #data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC")#, states=["CO2","Ir"])#, cutRecipeName="cutForPC")
-    data.learnDriftCorrection(uncorrectedName="filtValue", indicatorName="pretriggerMean", correctedName="filtValueDC",
-                                states=["CO2","Ir"], cutRecipeName="cutForLearnDC")#, _rethrow=True)
-    data.calibrateFollowingPlan("filtValueDC", calibratedName="energy", dlo=4, dhi=4, approximate=True, overwriteRecipe=True)
+    ### Mass corrections.
+    data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states=None)#, cutRecipeName="cutForPC")
+    data.learnDriftCorrection(uncorrectedName="filtValuePC", indicatorName="pretriggerMean", correctedName="filtValuePCDC",
+                                states=None, cutRecipeName="cutForLearnDC")#, _rethrow=True)
+    data.calibrateFollowingPlan("filtValuePCDC", calibratedName="energy", dlo=4, dhi=4, approximate=True, overwriteRecipe=True)
     ds.diagnoseCalibration()
     #data.qualityCheckLinefit("O H-Like 2p", positionToleranceFitSigma=3, worstAllowedFWHM=5, states="Ir", dlo=5, dhi=5)
     ###If I've used the O He-like complex (~570 eV) then we need to cut channels that misidentify the line
