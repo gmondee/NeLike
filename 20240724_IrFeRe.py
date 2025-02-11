@@ -13,13 +13,13 @@ import lmfit
 import CustomFluorescenceLines
 
 #Laptop
-#filename = r"C:\Users\Grant Mondeel\Box\CfA\TES\Ne-Like\20240723_off\0000\20240723_run0000_chan1.off"
+#filename = r"C:\Users\Grant Mondeel\Box\CfA\TES\Ne-Like\20240724_off\0000\20240724_run0000_chan1.off"
 
 #PC
-filename = r"C:\Users\lamat\Box\CfA\TES\Ne-Like\20240723_off\0000\20240723_run0000_chan1.off"
+filename = r"C:\Users\lamat\Box\CfA\TES\Ne-Like\20240724_off\0000\20240724_run0000_chan1.off"
 
 plt.ion()
-data = ChannelGroup(getOffFileListFromOneFile(filename, maxChans=999), verbose=True, channelClass = Channel, excludeStates=['A', 'IGNORE', 'STOP'])
+data = ChannelGroup(getOffFileListFromOneFile(filename, maxChans=999), verbose=True, channelClass = Channel, excludeStates=['IGNORE', 'STOP'])
 data.setDefaultBinsize(1.)
 mass.line_models.VALIDATE_BIN_SIZE = False ###with Galen's cal, had to go down to 0.025eV bins...
 ds = data.firstGoodChannel()
@@ -46,22 +46,20 @@ ds = data.firstGoodChannel()
 # plt.title("example reconstructed pulse")
 
 #Optional: assignes names to the states based on what was being observed
-data.experimentStateFile.aliasState("START", "Cal")
-data.experimentStateFile.aliasState("B", "W 1")
-data.experimentStateFile.aliasState("D", "W 2")
+data.experimentStateFile.aliasState("G", "Cal")
+#data.experimentStateFile.aliasState("START", "Cal 2")
 data.experimentStateFile.aliasState("E", "Re 1")
-data.experimentStateFile.aliasState("F", "Re 2")
-data.experimentStateFile.aliasState("G", "Os 1")
+data.experimentStateFile.aliasState("H", "Re 2")
+data.experimentStateFile.aliasState("I", "Ir 1")
 
 
 #Make a dictionary with lists of aliases for each element.
 #Pass this anywhere with the 'states=None' argument, e.g., data.plotHist(..., states=statesDict["W"])
 statesDict = {
-    "W"  : ["W 1", "W 2"],
+    "Ir"  : ["Ir 1"],
     "Re" : ["Re 1", "Re 2"],
-    "Os" : ["Os 1"],
     "Cal": ["Cal"],
-    "CalOn": ["Cal", "Re 1", "Re 2", "W 2", "Os 1"] #states where the calibration source was turned on
+    "CalOn": ["START","Cal", "Re 1", "Re 2", "Ir 1"] #states where the calibration source was turned on
 }
 
 
@@ -86,20 +84,24 @@ ds.calibrationPlanInit("filtValue")
 
 ds.calibrationPlanAddPoint(8724, "AlKAlpha", states=statesDict["Cal"])
 ds.calibrationPlanAddPoint(22563, "ScKAlpha", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(24414, "ScKBeta", states=statesDict["Cal"])
+# ds.calibrationPlanAddPoint(22600, "ScKAlpha", states=["START"])
+# ds.calibrationPlanAddPoint(24414, "ScKBeta", states=statesDict["Cal"])
 ds.calibrationPlanAddPoint(26826, "VKAlpha", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(29045, "VKBeta", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(31316, "MnKAlpha", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(33656, "FeKAlpha", states=statesDict["Cal"])
+ds.calibrationPlanAddPoint(29016, "VKBeta", states=statesDict["Cal"])
+ds.calibrationPlanAddPoint(31300, "MnKAlpha", states=statesDict["Cal"])
+ds.calibrationPlanAddPoint(33600, "FeKAlpha", states=statesDict["Cal"])
 ds.calibrationPlanAddPoint(36015, "CoKAlpha", states=statesDict["Cal"])
 # ds.calibrationPlanAddPoint(36575, "FeKBeta", states=statesDict["Cal"])
 # ds.calibrationPlanAddPoint(39140, "CoKBeta", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(40827, "CuKAlpha", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(43265, "ZnKAlpha", states=statesDict["Cal"])
+# ds.calibrationPlanAddPoint(40827, "CuKAlpha", states=statesDict["Cal"])
+ds.calibrationPlanAddPoint(43223, "ZnKAlpha", states=statesDict["Cal"])
+ds.calibrationPlanAddPoint(43313, "ZnKAlpha", states="START")
 # # ds.calibrationPlanAddPoint(44335, "CuKBeta", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(46963, "ZnKBeta", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(48184, "GeKAlphaCustom", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(52272, "GeKBeta", states=statesDict["Cal"])
+# ds.calibrationPlanAddPoint(46915, "ZnKBeta", states=statesDict["Cal"])
+# ds.calibrationPlanAddPoint(47040, "ZnKBeta", states=statesDict["Cal"])
+ds.calibrationPlanAddPoint(48125, "GeKAlphaCustom", states=statesDict["Cal"])
+ds.calibrationPlanAddPoint(48231, "GeKAlphaCustom", states=statesDict["Cal"])
+ds.calibrationPlanAddPoint(52296, "GeKBeta", states="START")
 
 ### Check calibration on just one channel
 # ds.calibrateFollowingPlan("filtValue", calibratedName="energy", dlo=50, dhi=50, approximate=True, overwriteRecipe=True)
@@ -115,7 +117,7 @@ energyRough > 8000, energyRough < 10000), setDefault=False)
 # data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states="Cal")#, cutRecipeName="cutForPC")
 data.learnDriftCorrection(uncorrectedName="filtValue", indicatorName="pretriggerMean", correctedName="filtValueDC",
                             states=statesDict["Cal"], cutRecipeName="cutForLearnDC")#, _rethrow=True)
-data.calibrateFollowingPlan("filtValueDC", calibratedName="energy", dlo=50, dhi=40, approximate=False, overwriteRecipe=True)
+data.calibrateFollowingPlan("filtValueDC", calibratedName="energy", dlo=70, dhi=40, approximate=False, overwriteRecipe=True)
 #data.qualityCheckLinefit("CuKAlpha", positionToleranceFitSigma=2, worstAllowedFWHM=12, states="Cal", dlo=50, dhi=40)
 ds.diagnoseCalibration()
 data[6].markBad("bad")
@@ -131,7 +133,7 @@ data.plotHist(np.arange(800, 13000, 1.), "energy", states=statesDict["CalOn"], c
 
 fig = plt.figure()
 ax = fig.gca()
-chan_range = data.keys()[0:10]
+chan_range = data.keys()[:]
 for Ds in chan_range:
     data[Ds].plotHist(np.arange(8000, 13000, 5.), "energy", states=statesDict["Cal"], coAddStates=False, axis=ax)
 plt.legend(chan_range)
@@ -164,14 +166,8 @@ plt.legend(chan_range)
 #             e = mass.spectra[key]
 #         print(f'{key}\t\t{e} \n')
 
-# ReBinCenters, ReData = data.hist(np.arange(800, 13000, 1.), "energy", states=["Re 1", "Re 2"])
-# np.savetxt("ReSpect.txt", [ReBinCenters, ReData])
+# IrBinCenters, IrData = data.hist(np.arange(800, 13000, 1.), "energy", states="Ir 1")
+# np.savetxt("IrSpect.txt", [IrBinCenters, IrData])
 
-# WBinCenters, WData = data.hist(np.arange(800, 13000, 1.), "energy", states=["W 1", "W 2"])
-# np.savetxt("WSpect.txt", [WBinCenters, WData])
-
-# OsBinCenters, OsData = data.hist(np.arange(800, 13000, 1.), "energy", states=["Os 1"])
-# np.savetxt("OsSpect.txt", [OsBinCenters, OsData])
-
-# CalBinCenters, CalData = data.hist(np.arange(800, 13000, 1.), "energy", states=["Cal"])
-# np.savetxt("OsCalSpect.txt", [CalBinCenters, CalData])
+# CalBinCenters, CalData = data.hist(np.arange(800, 13000, 1.), "energy", states=["Cal", "START"])
+# np.savetxt("IrCalSpect.txt", [CalBinCenters, CalData])
