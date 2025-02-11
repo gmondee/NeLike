@@ -160,8 +160,11 @@ plt.legend(chan_range)
 #             e = mass.spectra[key]
 #         print(f'{key}\t\t{e} \n')
 
-WBinCenters, WData = data.hist(np.arange(800, 13000, 1.), "energy", states="W")
-np.savetxt("WSpect.txt", [WBinCenters, WData])
+# WBinCenters, WData = data.hist(np.arange(800, 13000, 1.), "energy", states="W")
+# np.savetxt("WSpect.txt", [WBinCenters, WData])
 
-CalBinCenters, CalData = data.hist(np.arange(800, 13000, 1.), "energy", states=["Cal"])
-np.savetxt("WCalSpect.txt", [CalBinCenters, CalData])
+# CalBinCenters, CalData = data.hist(np.arange(800, 13000, 1.), "energy", states=["Cal"])
+# np.savetxt("WCalSpect.txt", [CalBinCenters, CalData])
+
+data.plotHist(np.arange(800, 13000, 1.), "energy", states=["Os"], coAddStates=False)
+plt.title("20240725 Os")

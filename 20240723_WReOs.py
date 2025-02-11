@@ -175,3 +175,6 @@ plt.legend(chan_range)
 
 # CalBinCenters, CalData = data.hist(np.arange(800, 13000, 1.), "energy", states=["Cal"])
 # np.savetxt("OsCalSpect.txt", [CalBinCenters, CalData])
+
+data.plotHist(np.arange(800, 13000, 1.), "energy", states=statesDict["Os"], coAddStates=True)
+plt.title("20240723 Os")
