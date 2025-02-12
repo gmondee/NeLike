@@ -45,13 +45,13 @@ ds = data.firstGoodChannel()
 # plt.ylabel("reconstructed signal (arbs)")
 # plt.title("example reconstructed pulse")
 
-#Optional: assignes names to the states based on what was being observed
-data.experimentStateFile.aliasState("START", "Cal")
-data.experimentStateFile.aliasState("B", "W 1")
-data.experimentStateFile.aliasState("D", "W 2")
-data.experimentStateFile.aliasState("E", "Re 1")
-data.experimentStateFile.aliasState("F", "Re 2")
-data.experimentStateFile.aliasState("G", "Os 1")
+###Optional: assignes names to the states based on what was being observed
+# data.experimentStateFile.aliasState("START", "Cal")
+# data.experimentStateFile.aliasState("B", "W 1")
+# data.experimentStateFile.aliasState("D", "W 2")
+# data.experimentStateFile.aliasState("E", "Re 1")
+# data.experimentStateFile.aliasState("F", "Re 2")
+# data.experimentStateFile.aliasState("G", "Os 1")
 
 
 #Make a dictionary with lists of aliases for each element.
