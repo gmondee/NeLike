@@ -13,10 +13,10 @@ import lmfit
 import CustomFluorescenceLines
 
 #Laptop
-#filename = r"C:\Users\Grant Mondeel\Box\CfA\TES\Ne-Like\20240723_off\0000\20240723_run0000_chan1.off"
+filename = r"C:\Users\Grant Mondeel\Box\CfA\TES\Ne-Like\20240723_off\0000\20240723_run0000_chan1.off"
 
 #PC
-filename = r"C:\Users\lamat\Box\CfA\TES\Ne-Like\20240723_off\0000\20240723_run0000_chan1.off"
+#filename = r"C:\Users\lamat\Box\CfA\TES\Ne-Like\20240723_off\0000\20240723_run0000_chan1.off"
 
 plt.ion()
 data = ChannelGroup(getOffFileListFromOneFile(filename, maxChans=999), verbose=True, channelClass = Channel, excludeStates=['A', 'IGNORE', 'STOP'])
@@ -57,11 +57,14 @@ ds = data.firstGoodChannel()
 #Make a dictionary with lists of aliases for each element.
 #Pass this anywhere with the 'states=None' argument, e.g., data.plotHist(..., states=statesDict["W"])
 statesDict = {
-    "W"  : ["W 1", "W 2"],
-    "Re" : ["Re 1", "Re 2"],
-    "Os" : ["Os 1"],
-    "Cal": ["Cal"],
-    "CalOn": ["Cal", "Re 1", "Re 2", "W 2", "Os 1"] #states where the calibration source was turned on
+    "W_ON"  : ["B_ON", "D_ON"],
+    "W_OFF"  : ["B_OFF", "D_OFF"],
+    "Re_ON" : ["E_ON", "F_ON"],
+    "Re_OFF" : ["E_OFF", "F_OFF"],
+    "Os_ON" : ["G_ON"],
+    "Os_OFF" : ["G_OFF"],
+    "Cal": ["START_OFF"],
+    "CalOn": ["B_ON", "D_ON", "E_ON", "F_ON", "G_ON"] #states where the calibration source was turned on
 }
 
 
