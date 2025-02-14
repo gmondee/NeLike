@@ -28,29 +28,6 @@ ds = data.firstGoodChannel()
 ###Some residual based cuts
 #data.learnResidualStdDevCut() #see if this is works
 
-###view some pulses
-# off = mass.off.OffFile(filename)
-# x,y = off.recordXY(1)
-
-# plt.figure()
-# plt.plot(off.basis[:,::-1]) # put the higher signal to noise components in the front
-# plt.xlabel("sample number")
-# plt.ylabel("weight")
-# plt.legend(["pulseMean","derivativeLike","pulseLike","extra0","extra1"])
-# plt.title("basis components")
-
-# plt.figure()
-# plt.plot(x,y)
-# plt.xlabel("time (s)")
-# plt.ylabel("reconstructed signal (arbs)")
-# plt.title("example reconstructed pulse")
-
-#Optional: assignes names to the states based on what was being observed
-data.experimentStateFile.aliasState("G", "Cal")
-#data.experimentStateFile.aliasState("START", "Cal 2")
-data.experimentStateFile.aliasState("E", "Re 1")
-data.experimentStateFile.aliasState("H", "Re 2")
-data.experimentStateFile.aliasState("I", "Ir 1")
 
 
 #Make a dictionary with lists of aliases for each element.

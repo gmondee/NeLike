@@ -13,10 +13,10 @@ import lmfit
 import CustomFluorescenceLines
 
 #Laptop
-filename = r"C:\Users\Grant Mondeel\Box\CfA\TES\Ne-Like\20240723_off\0000\20240723_run0000_chan1.off"
+#filename = r"C:\Users\Grant Mondeel\Box\CfA\TES\Ne-Like\20240723_off\0000\20240723_run0000_chan1.off"
 
 #PC
-#filename = r"C:\Users\lamat\Box\CfA\TES\Ne-Like\20240723_off\0000\20240723_run0000_chan1.off"
+filename = r"C:\Users\lamat\Box\CfA\TES\Ne-Like\20240723_off\0000\20240723_run0000_chan1.off"
 
 plt.ion()
 data = ChannelGroup(getOffFileListFromOneFile(filename, maxChans=999), verbose=True, channelClass = Channel, excludeStates=['A', 'IGNORE', 'STOP'])
@@ -57,19 +57,19 @@ ds = data.firstGoodChannel()
 #Make a dictionary with lists of aliases for each element.
 #Pass this anywhere with the 'states=None' argument, e.g., data.plotHist(..., states=statesDict["W"])
 statesDict = {
-    "W_ON"  : ["B_ON", "D_ON"],
+    "W_ON"  : ["D_ON"],
     "W_OFF"  : ["B_OFF", "D_OFF"],
     "Re_ON" : ["E_ON", "F_ON"],
     "Re_OFF" : ["E_OFF", "F_OFF"],
     "Os_ON" : ["G_ON"],
     "Os_OFF" : ["G_OFF"],
     "Cal": ["START_OFF"],
-    "CalOn": ["B_ON", "D_ON", "E_ON", "F_ON", "G_ON"] #states where the calibration source was turned on
+    "CalOn": ["START_OFF", "D_ON", "E_ON", "F_ON", "G_ON"] #states where the calibration source was turned on
 }
 
 
 ###view filtValue plot
-data[1].plotHist(np.arange(0,55000,10), "filtValue", coAddStates=False, states="Cal")
+data[1].plotHist(np.arange(0,55000,10), "filtValue", coAddStates=False, states=statesDict["CalOn"])
 
 ###Check how many pulses are in the data file
 # totalPulses = 0
@@ -87,22 +87,22 @@ def getPH(lineName): #See lines with mass.spectra and mass.STANDARD_FEATURES
 
 ds.calibrationPlanInit("filtValue")
 
-ds.calibrationPlanAddPoint(8724, "AlKAlpha", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(22563, "ScKAlpha", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(24414, "ScKBeta", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(26826, "VKAlpha", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(29045, "VKBeta", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(31316, "MnKAlpha", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(33656, "FeKAlpha", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(36015, "CoKAlpha", states=statesDict["Cal"])
-# ds.calibrationPlanAddPoint(36575, "FeKBeta", states=statesDict["Cal"])
-# ds.calibrationPlanAddPoint(39140, "CoKBeta", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(40827, "CuKAlpha", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(43265, "ZnKAlpha", states=statesDict["Cal"])
-# # ds.calibrationPlanAddPoint(44335, "CuKBeta", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(46963, "ZnKBeta", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(48184, "GeKAlphaCustom", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(52272, "GeKBeta", states=statesDict["Cal"])
+ds.calibrationPlanAddPoint(8724, "AlKAlpha", states=statesDict["CalOn"])
+ds.calibrationPlanAddPoint(22563, "ScKAlpha", states=statesDict["CalOn"])
+ds.calibrationPlanAddPoint(24414, "ScKBeta", states=statesDict["CalOn"])
+ds.calibrationPlanAddPoint(26826, "VKAlpha", states=statesDict["CalOn"])
+ds.calibrationPlanAddPoint(29045, "VKBeta", states=statesDict["CalOn"])
+ds.calibrationPlanAddPoint(31316, "MnKAlpha", states=statesDict["CalOn"])
+ds.calibrationPlanAddPoint(33656, "FeKAlpha", states=statesDict["CalOn"])
+ds.calibrationPlanAddPoint(36015, "CoKAlpha", states=statesDict["CalOn"])
+# ds.calibrationPlanAddPoint(36575, "FeKBeta", states=statesDict["CalOn"])
+# ds.calibrationPlanAddPoint(39140, "CoKBeta", states=statesDict["CalOn"])
+ds.calibrationPlanAddPoint(40827, "CuKAlpha", states=statesDict["CalOn"])
+ds.calibrationPlanAddPoint(43265, "ZnKAlpha", states=statesDict["CalOn"])
+# # ds.calibrationPlanAddPoint(44335, "CuKBeta", states=statesDict["CalOn"])
+ds.calibrationPlanAddPoint(46963, "ZnKBeta", states=statesDict["CalOn"])
+ds.calibrationPlanAddPoint(48184, "GeKAlphaCustom", states=statesDict["CalOn"])
+ds.calibrationPlanAddPoint(52272, "GeKBeta", states=statesDict["CalOn"])
 
 ### Check calibration on just one channel
 # ds.calibrateFollowingPlan("filtValue", calibratedName="energy", dlo=50, dhi=50, approximate=True, overwriteRecipe=True)
@@ -117,7 +117,7 @@ energyRough > 8000, energyRough < 10000), setDefault=False)
 ### Mass corrections.
 # data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states="Cal")#, cutRecipeName="cutForPC")
 data.learnDriftCorrection(uncorrectedName="filtValue", indicatorName="pretriggerMean", correctedName="filtValueDC",
-                            states=statesDict["Cal"], cutRecipeName="cutForLearnDC")#, _rethrow=True)
+                            states=statesDict["CalOn"], cutRecipeName="cutForLearnDC")#, _rethrow=True)
 data.calibrateFollowingPlan("filtValueDC", calibratedName="energy", dlo=50, dhi=40, approximate=False, overwriteRecipe=True)
 #data.qualityCheckLinefit("CuKAlpha", positionToleranceFitSigma=2, worstAllowedFWHM=12, states="Cal", dlo=50, dhi=40)
 ds.diagnoseCalibration()
@@ -132,12 +132,12 @@ data[6].markBad("bad")
 
 data.plotHist(np.arange(800, 13000, 1.), "energy", states=statesDict["CalOn"], coAddStates=False)
 
-fig = plt.figure()
-ax = fig.gca()
-chan_range = data.keys()[0:10]
-for Ds in chan_range:
-    data[Ds].plotHist(np.arange(8000, 13000, 5.), "energy", states=statesDict["Cal"], coAddStates=False, axis=ax)
-plt.legend(chan_range)
+# fig = plt.figure()
+# ax = fig.gca()
+# chan_range = data.keys()[0:10]
+# for Ds in chan_range:
+#     data[Ds].plotHist(np.arange(8000, 13000, 5.), "energy", states=statesDict["CalOn"], coAddStates=False, axis=ax)
+# plt.legend(chan_range)
 
 
 # iral1_line = mass.fluorescence_lines.SpectralLine.quick_monochromatic_line("Ir", 626.8, 0, 0)
@@ -179,5 +179,5 @@ plt.legend(chan_range)
 # CalBinCenters, CalData = data.hist(np.arange(800, 13000, 1.), "energy", states=["Cal"])
 # np.savetxt("OsCalSpect.txt", [CalBinCenters, CalData])
 
-data.plotHist(np.arange(800, 13000, 1.), "energy", states=statesDict["Os"], coAddStates=True)
-plt.title("20240723 Os")
+data.plotHist(np.arange(800, 13000, 1.), "energy", states=["START_OFF", "G_OFF"], coAddStates=False)
+plt.title("20240723 Re")
