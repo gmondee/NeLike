@@ -86,23 +86,25 @@ def getPH(lineName): #See lines with mass.spectra and mass.STANDARD_FEATURES
 #Sc_keys = [k for k in mass.STANDARD_FEATURES.keys() if 'Sc' in k]
 
 ds.calibrationPlanInit("filtValue")
-
-ds.calibrationPlanAddPoint(8724, "AlKAlpha", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(22563, "ScKAlpha", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(24414, "ScKBeta", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(26826, "VKAlpha", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(29045, "VKBeta", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(31316, "MnKAlpha", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(33656, "FeKAlpha", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(36015, "CoKAlpha", states=statesDict["CalOn"])
-# ds.calibrationPlanAddPoint(36575, "FeKBeta", states=statesDict["CalOn"])
-# ds.calibrationPlanAddPoint(39140, "CoKBeta", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(40827, "CuKAlpha", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(43265, "ZnKAlpha", states=statesDict["CalOn"])
-# # ds.calibrationPlanAddPoint(44335, "CuKBeta", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(46963, "ZnKBeta", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(48184, "GeKAlphaCustom", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(52272, "GeKBeta", states=statesDict["CalOn"])
+calStates = statesDict["Cal"]
+ds.calibrationPlanAddPoint(7034, "MgKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(8724, "AlKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(13267, "SKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(22563, "ScKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(24414, "ScKBeta", states=calStates)
+ds.calibrationPlanAddPoint(26826, "VKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(29045, "VKBeta", states=calStates)
+ds.calibrationPlanAddPoint(31316, "MnKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(33656, "FeKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(36015, "CoKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(36575, "FeKBeta", states=calStates)
+# ds.calibrationPlanAddPoint(39140, "CoKBeta", states=calStates)
+ds.calibrationPlanAddPoint(40827, "CuKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(43265, "ZnKAlpha", states=calStates)
+# # ds.calibrationPlanAddPoint(44335, "CuKBeta", states=calStates)
+ds.calibrationPlanAddPoint(46963, "ZnKBeta", states=calStates)
+ds.calibrationPlanAddPoint(48184, "GeKAlphaCustom", states=calStates)
+ds.calibrationPlanAddPoint(52272, "GeKBeta", states=calStates)
 
 ### Check calibration on just one channel
 # ds.calibrateFollowingPlan("filtValue", calibratedName="energy", dlo=50, dhi=50, approximate=True, overwriteRecipe=True)
@@ -118,7 +120,7 @@ energyRough > 8000, energyRough < 10000), setDefault=False)
 # data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states="Cal")#, cutRecipeName="cutForPC")
 data.learnDriftCorrection(uncorrectedName="filtValue", indicatorName="pretriggerMean", correctedName="filtValueDC",
                             states=statesDict["CalOn"], cutRecipeName="cutForLearnDC")#, _rethrow=True)
-data.calibrateFollowingPlan("filtValueDC", calibratedName="energy", dlo=50, dhi=40, approximate=False, overwriteRecipe=True)
+data.calibrateFollowingPlan("filtValueDC", calibratedName="energy", dlo=50, dhi=40, approximate=True, overwriteRecipe=True)
 #data.qualityCheckLinefit("CuKAlpha", positionToleranceFitSigma=2, worstAllowedFWHM=12, states="Cal", dlo=50, dhi=40)
 ds.diagnoseCalibration()
 data[6].markBad("bad")
@@ -132,12 +134,12 @@ data[6].markBad("bad")
 
 data.plotHist(np.arange(800, 13000, 1.), "energy", states=statesDict["CalOn"], coAddStates=False)
 
-# fig = plt.figure()
-# ax = fig.gca()
-# chan_range = data.keys()[0:10]
-# for Ds in chan_range:
-#     data[Ds].plotHist(np.arange(8000, 13000, 5.), "energy", states=statesDict["CalOn"], coAddStates=False, axis=ax)
-# plt.legend(chan_range)
+fig = plt.figure()
+ax = fig.gca()
+chan_range = data.keys()[0:5]
+for Ds in chan_range:
+    data[Ds].plotHist(np.arange(800, 13000, 1.), "energy", states=statesDict["CalOn"], coAddStates=True, axis=ax)
+plt.legend(chan_range)
 
 
 # iral1_line = mass.fluorescence_lines.SpectralLine.quick_monochromatic_line("Ir", 626.8, 0, 0)
@@ -167,17 +169,31 @@ data.plotHist(np.arange(800, 13000, 1.), "energy", states=statesDict["CalOn"], c
 #             e = mass.spectra[key]
 #         print(f'{key}\t\t{e} \n')
 
-# ReBinCenters, ReData = data.hist(np.arange(800, 13000, 1.), "energy", states=["Re 1", "Re 2"])
-# np.savetxt("ReSpect.txt", [ReBinCenters, ReData])
+if True:
+    WBinCenters, WData = data.hist(np.arange(800, 13000, 2.), "energy", states=statesDict["W_OFF"])
+    import csv
+    rows = zip(WBinCenters, WData)
+    with open("W_20240723.txt", "w", newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["Bin center (eV)", "Counts per 2 eV bin"])
+        for row in rows:
+            writer.writerow(row)
 
-# WBinCenters, WData = data.hist(np.arange(800, 13000, 1.), "energy", states=["W 1", "W 2"])
-# np.savetxt("WSpect.txt", [WBinCenters, WData])
+    OsBinCenters, OsData = data.hist(np.arange(800, 13000, 2.), "energy", states=statesDict["Os_OFF"])
+    rows = zip(OsBinCenters, OsData)
+    with open("Os_20240723.txt", "w", newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["Bin center (eV)", "Counts per 2 eV bin"])
+        for row in rows:
+            writer.writerow(row)
 
-# OsBinCenters, OsData = data.hist(np.arange(800, 13000, 1.), "energy", states=["Os 1"])
-# np.savetxt("OsSpect.txt", [OsBinCenters, OsData])
+    ReBinCenters, ReData = data.hist(np.arange(800, 13000, 2.), "energy", states=statesDict["Re_OFF"])
+    rows = zip(ReBinCenters, ReData)
+    with open("Re_20240723.txt", "w", newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["Bin center (eV)", "Counts per 2 eV bin"])
+        for row in rows:
+            writer.writerow(row)
 
-# CalBinCenters, CalData = data.hist(np.arange(800, 13000, 1.), "energy", states=["Cal"])
-# np.savetxt("OsCalSpect.txt", [CalBinCenters, CalData])
-
-data.plotHist(np.arange(800, 13000, 1.), "energy", states=["START_OFF", "G_OFF"], coAddStates=False)
-plt.title("20240723 Re")
+data.plotHist(np.arange(800, 13000, 2.), "energy", states=statesDict["W_OFF"], coAddStates=True)
+plt.title("20240723 W")

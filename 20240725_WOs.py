@@ -13,13 +13,13 @@ import lmfit
 import CustomFluorescenceLines
 
 #Laptop
-#filename = r"C:\Users\Grant Mondeel\Box\CfA\TES\Ne-Like\20240725_off\0000\20240725_run0000_chan1.off"
+filename = r"C:\Users\Grant Mondeel\Box\CfA\TES\Ne-Like\20240725_off\0000\20240725_run0000_chan1.off"
 
 #PC
-filename = r"C:\Users\lamat\Box\CfA\TES\Ne-Like\20240725_off\0000\20240725_run0000_chan1.off"
+#filename = r"C:\Users\lamat\Box\CfA\TES\Ne-Like\20240725_off\0000\20240725_run0000_chan1.off"
 
 plt.ion()
-data = ChannelGroup(getOffFileListFromOneFile(filename, maxChans=999), verbose=True, channelClass = Channel, excludeStates=['IGNORE', 'STOP'])
+data = ChannelGroup(getOffFileListFromOneFile(filename, maxChans=999), verbose=True, channelClass = Channel, excludeStates=['IGNORE_OFF', 'IGNORE_ON', 'STOP'])
 data.setDefaultBinsize(1.)
 mass.line_models.VALIDATE_BIN_SIZE = False ###with Galen's cal, had to go down to 0.025eV bins...
 ds = data.firstGoodChannel()
@@ -45,24 +45,20 @@ ds = data.firstGoodChannel()
 # plt.ylabel("reconstructed signal (arbs)")
 # plt.title("example reconstructed pulse")
 
-#Optional: assignes names to the states based on what was being observed
-# data.experimentStateFile.aliasState("G", "Os")
-# data.experimentStateFile.aliasState("F", "W")
-# data.experimentStateFile.aliasState("I", "Cal")
-
-
 #Make a dictionary with lists of aliases for each element.
 #Pass this anywhere with the 'states=None' argument, e.g., data.plotHist(..., states=statesDict["W"])
 statesDict = {
-    "Os"  : ["Os"],
-    "W"   : ["W"],
-    "Cal": ["Cal"],
-    "SciCal": ["Cal", "Os", "W"] #cal states and science states, for easy comparison
+    "Os_OFF"  : ["F_OFF"],
+    "Os_ON"   : ["F_ON"],
+    "W_OFF"   : ["G_OFF"],
+    "W_ON"    : ["G_ON"],
+    "Cal"     : ["I_OFF"],
+    "CalOn"   : ["I_OFF", "F_ON", "G_ON"]
 }
 
 
 ###view filtValue plot
-data[1].plotHist(np.arange(0,55000,10), "filtValue", coAddStates=False, states="Cal")
+data[1].plotHist(np.arange(0,55000,10), "filtValue", coAddStates=False, states=statesDict["CalOn"])
 
 ###Check how many pulses are in the data file
 # totalPulses = 0
@@ -79,23 +75,23 @@ def getPH(lineName): #See lines with mass.spectra and mass.STANDARD_FEATURES
 #Sc_keys = [k for k in mass.STANDARD_FEATURES.keys() if 'Sc' in k]
 
 ds.calibrationPlanInit("filtValue")
-
-ds.calibrationPlanAddPoint(8915, "AlKAlpha", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(23273, "ScKAlpha", states=statesDict["Cal"])
-# ds.calibrationPlanAddPoint(24414, "ScKBeta", states=statesDict["Cal"])
-# ds.calibrationPlanAddPoint(29734, "VKAlpha", states=statesDict["Cal"])
-# ds.calibrationPlanAddPoint(31964, "VKBeta", states=statesDict["Cal"])
-# ds.calibrationPlanAddPoint(31300, "MnKAlpha", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(34244, "FeKAlpha", states=statesDict["Cal"])
-# ds.calibrationPlanAddPoint(36544, "CoKAlpha", states=statesDict["Cal"])
-# ds.calibrationPlanAddPoint(36575, "FeKBeta", states=statesDict["Cal"])
-# ds.calibrationPlanAddPoint(39140, "CoKBeta", states=statesDict["Cal"])
-# ds.calibrationPlanAddPoint(40827, "CuKAlpha", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(43589, "ZnKAlpha", states=statesDict["Cal"])
-# # ds.calibrationPlanAddPoint(44335, "CuKBeta", states=statesDict["Cal"])
-# ds.calibrationPlanAddPoint(47220, "ZnKBeta", states=statesDict["Cal"])
-ds.calibrationPlanAddPoint(48428, "GeKAlphaCustom", states=statesDict["Cal"])
-# ds.calibrationPlanAddPoint(52518, "GeKBeta", states="Cal")
+calStates = statesDict["Cal"]
+ds.calibrationPlanAddPoint(8915, "AlKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(23273, "ScKAlpha", states=calStates)
+#ds.calibrationPlanAddPoint(24414, "ScKBeta", states=calStates)
+# ds.calibrationPlanAddPoint(29734, "VKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(31964, "VKBeta", states=calStates)
+#ds.calibrationPlanAddPoint(31300, "MnKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(34244, "FeKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(36544, "CoKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(36530, "FeKBeta", states=calStates)
+# ds.calibrationPlanAddPoint(39140, "CoKBeta", states=calStates)
+# ds.calibrationPlanAddPoint(40827, "CuKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(43589, "ZnKAlpha", states=calStates)
+#ds.calibrationPlanAddPoint(44335, "CuKBeta", states=calStates)
+ds.calibrationPlanAddPoint(47220, "ZnKBeta", states=calStates)
+ds.calibrationPlanAddPoint(48428, "GeKAlphaCustom", states=calStates)
+ds.calibrationPlanAddPoint(52518, "GeKBeta", states=calStates)
 
 ### Check calibration on just one channel
 # ds.calibrateFollowingPlan("filtValue", calibratedName="energy", dlo=50, dhi=50, approximate=True, overwriteRecipe=True)
@@ -110,7 +106,7 @@ energyRough > 8000, energyRough < 10000), setDefault=False)
 ### Mass corrections.
 # data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states="Cal")#, cutRecipeName="cutForPC")
 data.learnDriftCorrection(uncorrectedName="filtValue", indicatorName="pretriggerMean", correctedName="filtValueDC",
-                            states=statesDict["Cal"], cutRecipeName="cutForLearnDC")#, _rethrow=True)
+                            states=statesDict["CalOn"], cutRecipeName="cutForLearnDC")#, _rethrow=True)
 data.calibrateFollowingPlan("filtValueDC", calibratedName="energy", dlo=70, dhi=40, approximate=False, overwriteRecipe=True)
 #data.qualityCheckLinefit("CuKAlpha", positionToleranceFitSigma=2, worstAllowedFWHM=12, states="Cal", dlo=50, dhi=40)
 ds.diagnoseCalibration()
@@ -123,7 +119,7 @@ data[6].markBad("bad")
 #     data.qualityCheckLinefit(line, positionToleranceFitSigma=2, worstAllowedFWHM=14, states="Cal", dlo=50, dhi=50)
 # plt.close()
 
-data.plotHist(np.arange(800, 13000, 1.), "energy", states=statesDict["SciCal"], coAddStates=False)
+data.plotHist(np.arange(800, 13000, 1.), "energy", states=statesDict["W_ON"], coAddStates=False)
 
 fig = plt.figure()
 ax = fig.gca()
@@ -160,11 +156,36 @@ plt.legend(chan_range)
 #             e = mass.spectra[key]
 #         print(f'{key}\t\t{e} \n')
 
-# WBinCenters, WData = data.hist(np.arange(800, 13000, 1.), "energy", states="W")
-# np.savetxt("WSpect.txt", [WBinCenters, WData])
+if True:
+    WBinCenters, WData = data.hist(np.arange(800, 13000, 2.), "energy", states=statesDict["W_OFF"])
+    import csv
+    rows = zip(WBinCenters, WData)
+    with open("W_20240725.txt", "w", newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["Bin center (eV)", "Counts per 2 eV bin"])
+        for row in rows:
+            writer.writerow(row)
+
+    OsBinCenters, OsData = data.hist(np.arange(800, 13000, 2.), "energy", states=statesDict["Os_OFF"])
+    rows = zip(OsBinCenters, OsData)
+    with open("Os_20240725.txt", "w", newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["Bin center (eV)", "Counts per 2 eV bin"])
+        for row in rows:
+            writer.writerow(row)
 
 # CalBinCenters, CalData = data.hist(np.arange(800, 13000, 1.), "energy", states=["Cal"])
 # np.savetxt("WCalSpect.txt", [CalBinCenters, CalData])
 
-data.plotHist(np.arange(800, 13000, 1.), "energy", states=["Os"], coAddStates=False)
-plt.title("20240725 Os")
+fig = plt.figure()
+ax = fig.gca()
+data.plotHist(np.arange(800, 13000, 2.), "energy", states=statesDict["CalOn"], coAddStates=True, axis=ax)
+data.plotHist(np.arange(800, 13000, 2.), "energy", states=statesDict["Os_OFF"], coAddStates=False, axis=ax)
+plt.title("20240724 Os")
+
+fig = plt.figure()
+ax = fig.gca()
+#data.plotHist(np.arange(800, 13000, 2.), "energy", states=statesDict["CalOn"], coAddStates=True, axis=ax)
+data.plotHist(np.arange(800, 13000, 2.), "energy", states=statesDict["W_OFF"], coAddStates=False, axis=ax)
+ds.plotHist(np.arange(800, 13000, 2.), "energy", states=statesDict["W_OFF"], coAddStates=False, axis=ax)
+plt.title("20240724 W")

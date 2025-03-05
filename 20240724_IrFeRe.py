@@ -13,10 +13,10 @@ import lmfit
 import CustomFluorescenceLines
 
 #Laptop
-#filename = r"C:\Users\Grant Mondeel\Box\CfA\TES\Ne-Like\20240724_off\0000\20240724_run0000_chan1.off"
+filename = r"C:\Users\Grant Mondeel\Box\CfA\TES\Ne-Like\20240724_off\0000\20240724_run0000_chan1.off"
 
 #PC
-filename = r"C:\Users\lamat\Box\CfA\TES\Ne-Like\20240724_off\0000\20240724_run0000_chan1.off"
+#filename = r"C:\Users\lamat\Box\CfA\TES\Ne-Like\20240724_off\0000\20240724_run0000_chan1.off"
 
 plt.ion()
 data = ChannelGroup(getOffFileListFromOneFile(filename, maxChans=999), verbose=True, channelClass = Channel, excludeStates=['IGNORE', 'STOP'])
@@ -148,6 +148,16 @@ plt.legend(chan_range)
 
 # IrBinCenters, IrData = data.hist(np.arange(800, 13000, 1.), "energy", states="Ir 1")
 # np.savetxt("IrSpect.txt", [IrBinCenters, IrData])
+
+if False:
+    import csv
+    IrBinCenters, IrData = data.hist(np.arange(800, 13000, 2.), "energy", states=statesDict["Ir_OFF"])
+    rows = zip(IrBinCenters, IrData)
+    with open("Ir_20240725.txt", "w", newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["Bin center (eV)", "Counts per 2 eV bin"])
+        for row in rows:
+            writer.writerow(row)
 
 # CalBinCenters, CalData = data.hist(np.arange(800, 13000, 1.), "energy", states=["Cal", "START"])
 # np.savetxt("IrCalSpect.txt", [CalBinCenters, CalData])
