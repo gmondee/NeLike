@@ -13,10 +13,10 @@ import lmfit
 import CustomFluorescenceLines
 
 #Laptop
-#filename = r"C:\Users\Grant Mondeel\Box\CfA\TES\Ne-Like\20240723_off\0000\20240723_run0000_chan1.off"
+filename = r"C:\Users\Grant Mondeel\Box\CfA\TES\Ne-Like\20240723_off\0000\20240723_run0000_chan1.off"
 
 #PC
-filename = r"C:\Users\lamat\Box\CfA\TES\Ne-Like\20240723_off\0000\20240723_run0000_chan1.off"
+#filename = r"C:\Users\lamat\Box\CfA\TES\Ne-Like\20240723_off\0000\20240723_run0000_chan1.off"
 
 plt.ion()
 data = ChannelGroup(getOffFileListFromOneFile(filename, maxChans=999), verbose=True, channelClass = Channel, excludeStates=['A', 'IGNORE', 'STOP'])
@@ -112,7 +112,7 @@ ds.calibrationPlanAddPoint(52272, "GeKBeta", states=calStates)
 # ds.plotHist(np.arange(800, 12000, 1), "energy", states=["Cal"], coAddStates=False)
 
 data.alignToReferenceChannel(referenceChannel=ds,
-                            binEdges=np.arange(3000, 60000, 3), attr="filtValue")#, _rethrow=True)
+                            binEdges=np.arange(3000, 60000, 5), attr="filtValue")#, _rethrow=True)
 data.cutAdd("cutForLearnDC", lambda energyRough: np.logical_and(
 energyRough > 8000, energyRough < 10000), setDefault=False)
 
@@ -169,7 +169,7 @@ plt.legend(chan_range)
 #             e = mass.spectra[key]
 #         print(f'{key}\t\t{e} \n')
 
-if True:
+if False:
     WBinCenters, WData = data.hist(np.arange(800, 13000, 2.), "energy", states=statesDict["W_OFF"])
     import csv
     rows = zip(WBinCenters, WData)

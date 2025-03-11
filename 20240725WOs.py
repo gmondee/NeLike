@@ -48,10 +48,10 @@ ds = data.firstGoodChannel()
 #Make a dictionary with lists of aliases for each element.
 #Pass this anywhere with the 'states=None' argument, e.g., data.plotHist(..., states=statesDict["W"])
 statesDict = {
-    "Os_OFF"  : ["F_OFF"],
-    "Os_ON"   : ["F_ON"],
-    "W_OFF"   : ["G_OFF"],
-    "W_ON"    : ["G_ON"],
+    "Os_OFF"  : ["G_OFF"],
+    "Os_ON"   : ["G_ON"],
+    "W_OFF"   : ["F_OFF"],
+    "W_ON"    : ["F_ON"],
     "Cal"     : ["I_OFF"],
     "CalOn"   : ["I_OFF", "F_ON", "G_ON"]
 }
