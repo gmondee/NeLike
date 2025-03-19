@@ -169,7 +169,7 @@ plt.legend(chan_range)
 #             e = mass.spectra[key]
 #         print(f'{key}\t\t{e} \n')
 
-if False:
+if True:
     WBinCenters, WData = data.hist(np.arange(800, 13000, 2.), "energy", states=statesDict["W_OFF"])
     import csv
     rows = zip(WBinCenters, WData)

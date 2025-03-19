@@ -38,7 +38,7 @@ statesDict = {
     "Re_OFF" : ["E_OFF", "H_OFF"],
     "Ir_ON" : ["I_ON"],
     "Ir_OFF" : ["I_OFF"],
-    "Cal": ["START_OFF", "G_OFF"],
+    "Cal": ["G_OFF"],
     "CalOn": ["START_OFF", "G_OFF", "I_ON"] #states where the calibration source was turned on
 }
 
@@ -61,27 +61,23 @@ def getPH(lineName): #See lines with mass.spectra and mass.STANDARD_FEATURES
 #Sc_keys = [k for k in mass.STANDARD_FEATURES.keys() if 'Sc' in k]
 
 ds.calibrationPlanInit("filtValue")
-
-ds.calibrationPlanAddPoint(8724, "AlKAlpha", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(22563, "ScKAlpha", states=statesDict["CalOn"])
-# ds.calibrationPlanAddPoint(22600, "ScKAlpha", states=statesDict["CalOn"])
-# ds.calibrationPlanAddPoint(24414, "ScKBeta", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(26826, "VKAlpha", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(29016, "VKBeta", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(31300, "MnKAlpha", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(33600, "FeKAlpha", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(36015, "CoKAlpha", states=statesDict["CalOn"])
-# ds.calibrationPlanAddPoint(36575, "FeKBeta", states=statesDict["CalOn"])
-# ds.calibrationPlanAddPoint(39140, "CoKBeta", states=statesDict["CalOn"])
-# ds.calibrationPlanAddPoint(40827, "CuKAlpha", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(43223, "ZnKAlpha", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(43313, "ZnKAlpha", states=statesDict["CalOn"])
-# # ds.calibrationPlanAddPoint(44335, "CuKBeta", states=statesDict["CalOn"])
-# ds.calibrationPlanAddPoint(46915, "ZnKBeta", states=statesDict["CalOn"])
-# ds.calibrationPlanAddPoint(47040, "ZnKBeta", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(48125, "GeKAlphaCustom", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(48231, "GeKAlphaCustom", states=statesDict["CalOn"])
-ds.calibrationPlanAddPoint(52296, "GeKBeta", states=statesDict["CalOn"])
+calStates = statesDict["Cal"]
+ds.calibrationPlanAddPoint(8724, "AlKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(22563, "ScKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(24414, "ScKBeta", states=calStates)
+ds.calibrationPlanAddPoint(26826, "VKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(29016, "VKBeta", states=calStates)
+ds.calibrationPlanAddPoint(31300, "MnKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(33600, "FeKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(36015, "CoKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(36575, "FeKBeta", states=calStates)
+# ds.calibrationPlanAddPoint(39140, "CoKBeta", states=calStates)
+# ds.calibrationPlanAddPoint(40827, "CuKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(43223, "ZnKAlpha", states=calStates)
+# # ds.calibrationPlanAddPoint(44335, "CuKBeta", states=calStates)
+# ds.calibrationPlanAddPoint(47040, "ZnKBeta", states=calStates)
+ds.calibrationPlanAddPoint(48125, "GeKAlphaCustom", states=calStates)
+ds.calibrationPlanAddPoint(52189, "GeKBeta", states=calStates)
 
 ### Check calibration on just one channel
 # ds.calibrateFollowingPlan("filtValue", calibratedName="energy", dlo=50, dhi=50, approximate=True, overwriteRecipe=True)
@@ -153,7 +149,7 @@ if False:
     import csv
     IrBinCenters, IrData = data.hist(np.arange(800, 13000, 2.), "energy", states=statesDict["Ir_OFF"])
     rows = zip(IrBinCenters, IrData)
-    with open("Ir_20240725.txt", "w", newline='') as f:
+    with open("Ir_20240724.txt", "w", newline='') as f:
         writer = csv.writer(f)
         writer.writerow(["Bin center (eV)", "Counts per 2 eV bin"])
         for row in rows:
