@@ -13,10 +13,10 @@ import lmfit
 import CustomFluorescenceLines
 
 #Laptop
-filename = r"C:\Users\Grant Mondeel\Box\CfA\TES\Ne-Like\20240724_off\0000\20240724_run0000_chan1.off"
+#filename = r"C:\Users\Grant Mondeel\Box\CfA\TES\Ne-Like\20240724_off\0000\20240724_run0000_chan1.off"
 
 #PC
-#filename = r"C:\Users\lamat\Box\CfA\TES\Ne-Like\20240724_off\0000\20240724_run0000_chan1.off"
+filename = r"C:\Users\lamat\Box\CfA\TES\Ne-Like\20240724_off\0000\20240724_run0000_chan1.off"
 
 plt.ion()
 data = ChannelGroup(getOffFileListFromOneFile(filename, maxChans=999), verbose=True, channelClass = Channel, excludeStates=['IGNORE', 'STOP'])
@@ -77,8 +77,8 @@ ds.calibrationPlanAddPoint(43223, "ZnKAlpha", states=calStates)
 # # ds.calibrationPlanAddPoint(44335, "CuKBeta", states=calStates)
 # ds.calibrationPlanAddPoint(47040, "ZnKBeta", states=calStates)
 ds.calibrationPlanAddPoint(48125, "GeKAlphaCustom", states=calStates)
-ds.calibrationPlanAddPoint(52189, "GeKBeta", states=calStates)
-
+#ds.calibrationPlanAddPoint(52189, "GeKBeta", states=calStates)
+ds.calibrationPlanAddPoint(52314, "GeKBeta", states="START_OFF")
 ### Check calibration on just one channel
 # ds.calibrateFollowingPlan("filtValue", calibratedName="energy", dlo=50, dhi=50, approximate=True, overwriteRecipe=True)
 # ds.diagnoseCalibration()
@@ -91,10 +91,11 @@ energyRough > 8000, energyRough < 11000), setDefault=False)
 
 ### Mass corrections.
 # data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states="Cal")#, cutRecipeName="cutForPC")
-data.learnDriftCorrection(uncorrectedName="filtValue", indicatorName="pretriggerMean", correctedName="filtValueDC",
-                            states=statesDict["Cal"], cutRecipeName="cutForLearnDC")#, _rethrow=True)
-data.calibrateFollowingPlan("filtValueDC", calibratedName="energy", dlo=70, dhi=40, approximate=False, overwriteRecipe=True)
-#data.qualityCheckLinefit("CuKAlpha", positionToleranceFitSigma=2, worstAllowedFWHM=12, states="Cal", dlo=50, dhi=40)
+data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states=statesDict["Cal"])
+data.learnDriftCorrection(uncorrectedName="filtValuePC", indicatorName="pretriggerMean", correctedName="filtValueDC",
+                            states=statesDict["CalOn"], cutRecipeName="cutForLearnDC")#, _rethrow=True)
+data.calibrateFollowingPlan("filtValueDC", calibratedName="energy", dlo=70, dhi=40, approximate=True, overwriteRecipe=True)
+data.qualityCheckLinefit("ZnKAlpha", positionToleranceFitSigma=3, worstAllowedFWHM=10, states=statesDict["Cal"], dlo=70, dhi=40)
 ds.diagnoseCalibration()
 data[6].markBad("bad")
 # data.qualityCheckLinefit("GeKBeta", positionToleranceFitSigma=2, worstAllowedFWHM=12, states="Cal", dlo=50, dhi=40)

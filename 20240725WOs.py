@@ -13,10 +13,10 @@ import lmfit
 import CustomFluorescenceLines
 
 #Laptop
-filename = r"C:\Users\Grant Mondeel\Box\CfA\TES\Ne-Like\20240725_off\0000\20240725_run0000_chan1.off"
+#filename = r"C:\Users\Grant Mondeel\Box\CfA\TES\Ne-Like\20240725_off\0000\20240725_run0000_chan1.off"
 
 #PC
-#filename = r"C:\Users\lamat\Box\CfA\TES\Ne-Like\20240725_off\0000\20240725_run0000_chan1.off"
+filename = r"C:\Users\lamat\Box\CfA\TES\Ne-Like\20240725_off\0000\20240725_run0000_chan1.off"
 
 plt.ion()
 data = ChannelGroup(getOffFileListFromOneFile(filename, maxChans=999), verbose=True, channelClass = Channel, excludeStates=['IGNORE_OFF', 'IGNORE_ON', 'STOP'])
@@ -52,7 +52,7 @@ statesDict = {
     "Os_ON"   : ["G_ON"],
     "W_OFF"   : ["F_OFF"],
     "W_ON"    : ["F_ON"],
-    "Cal"     : ["I_OFF"],
+    "Cal"     : ["I_OFF", "G_ON"],
     "CalOn"   : ["I_OFF", "F_ON", "G_ON"]
 }
 
@@ -123,6 +123,8 @@ data[6].markBad("bad")
 #     data.qualityCheckLinefit(line, positionToleranceFitSigma=5, worstAllowedFWHM=16, states=statesDict["CalOn"], dlo=50, dhi=50)
 # plt.close()
 
+data.qualityCheckLinefit("ZnKAlpha", positionToleranceFitSigma=3, worstAllowedFWHM=10, states=statesDict["CalOn"], dlo=50, dhi=50)
+
 data.plotHist(np.arange(800, 13000, 1.), "energy", states=statesDict["W_ON"], coAddStates=False)
 
 fig = plt.figure()
@@ -160,7 +162,7 @@ plt.legend(chan_range)
 #             e = mass.spectra[key]
 #         print(f'{key}\t\t{e} \n')
 
-if True:
+if False:
     WBinCenters, WData = data.hist(np.arange(800, 13000, 2.), "energy", states=statesDict["W_OFF"])
     import csv
     rows = zip(WBinCenters, WData)

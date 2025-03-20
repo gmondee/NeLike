@@ -10,7 +10,7 @@ import pandas as pd
 import lmfit
 import pathlib
 
-spectraPath = pathlib.Path(r"C:\Users\Grant Mondeel\Box\CfA\TES\Ne-Like\Repo\NeLike\NeLikeClean")
+spectraPath = pathlib.Path(r"C:\Users\lamat\Box\CfA\TES\Ne-Like\Repo\NeLike\NeLikeCleanNewGe")
 spectraFiles = list(spectraPath.glob("*.txt"))
 
 numSpectra = len(spectraFiles)
