@@ -42,7 +42,8 @@ statesDict = {
     "Ir_ON" : ["I_ON"],
     "Ir_OFF" : ["I_OFF"],
     "Cal": ["G_OFF"],
-    "CalOn": ["START_OFF", "G_OFF", "I_ON"] #states where the calibration source was turned on
+    "CalOn": ["G_OFF", "I_ON"], #states where the calibration source was turned on
+    "SciOrCal":["E_OFF", "H_OFF", "I_OFF", "G_OFF"]
 }
 
 
@@ -65,23 +66,23 @@ def getPH(lineName): #See lines with mass.spectra and mass.STANDARD_FEATURES
 
 ds.calibrationPlanInit("filtValue")
 calStates = statesDict["Cal"]
-ds.calibrationPlanAddPoint(8724, "AlKAlpha", states=calStates)
-ds.calibrationPlanAddPoint(22563, "ScKAlpha", states=calStates)
-# ds.calibrationPlanAddPoint(24414, "ScKBeta", states=calStates)
-ds.calibrationPlanAddPoint(26826, "VKAlpha", states=calStates)
-ds.calibrationPlanAddPoint(29016, "VKBeta", states=calStates)
+# ds.calibrationPlanAddPoint(8724, "AlKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(22563, "ScKAlpha", states=calStates)
+# # ds.calibrationPlanAddPoint(24414, "ScKBeta", states=calStates)
+# ds.calibrationPlanAddPoint(26826, "VKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(29016, "VKBeta", states=calStates)
 ds.calibrationPlanAddPoint(31300, "MnKAlpha", states=calStates)
-ds.calibrationPlanAddPoint(33600, "FeKAlpha", states=calStates)
-ds.calibrationPlanAddPoint(36015, "CoKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(33600, "FeKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(36015, "CoKAlpha", states=calStates)
 # ds.calibrationPlanAddPoint(36575, "FeKBeta", states=calStates)
 # ds.calibrationPlanAddPoint(39140, "CoKBeta", states=calStates)
 # ds.calibrationPlanAddPoint(40827, "CuKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(43223, "ZnKAlpha", states=calStates)
 # # ds.calibrationPlanAddPoint(44335, "CuKBeta", states=calStates)
 # ds.calibrationPlanAddPoint(47040, "ZnKBeta", states=calStates)
-ds.calibrationPlanAddPoint(48125, "GeKAlphaCustom", states=calStates)
-#ds.calibrationPlanAddPoint(52189, "GeKBeta", states=calStates)
-ds.calibrationPlanAddPoint(52314, "GeKBetaCustom", states="START_OFF")
+# ds.calibrationPlanAddPoint(48125, "GeKAlphaCustom", states=calStates)
+# #ds.calibrationPlanAddPoint(52189, "GeKBeta", states=calStates)
+# ds.calibrationPlanAddPoint(52314, "GeKBetaCustom", states="START_OFF")
 ### Check calibration on just one channel
 # ds.calibrateFollowingPlan("filtValue", calibratedName="energy", dlo=50, dhi=50, approximate=True, overwriteRecipe=True)
 # ds.diagnoseCalibration()
@@ -94,10 +95,10 @@ energyRough > 8000, energyRough < 11000), setDefault=False)
 
 ### Mass corrections.
 # data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states="Cal")#, cutRecipeName="cutForPC")
-data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states=statesDict["Cal"])
-data.learnDriftCorrection(uncorrectedName="filtValuePC", indicatorName="pretriggerMean", correctedName="filtValueDC",
-                            states=statesDict["CalOn"], cutRecipeName="cutForLearnDC")#, _rethrow=True)
-data.calibrateFollowingPlan("filtValueDC", calibratedName="energy", dlo=70, dhi=70, approximate=False, overwriteRecipe=True)
+# data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states=statesDict["SciOrCal"])
+# data.learnDriftCorrection(uncorrectedName="filtValuePC", indicatorName="pretriggerMean", correctedName="filtValueDC",
+#                             states=statesDict["CalOn"], cutRecipeName="cutForLearnDC")#, _rethrow=True)
+data.calibrateFollowingPlan("filtValue", calibratedName="energy", dlo=70, dhi=70, approximate=False, overwriteRecipe=True)
 # data.qualityCheckLinefit("ZnKAlpha", positionToleranceFitSigma=3, worstAllowedFWHM=10, states=statesDict["Cal"], dlo=70, dhi=40)
 ds.diagnoseCalibration()
 data[6].markBad("bad")

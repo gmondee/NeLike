@@ -9,7 +9,7 @@ VOIGT_PEAK_HEIGHT = 99999
 mass.calibration.fluorescence_lines.addline(
     element="Ge",
     material="metal",
-    linetype="KAlphaCustom",
+    linetype="KAlphaCustomOld",
     reference_short="Zn Hack",
     reference_plot_instrument_gaussian_fwhm=None,
     nominal_peak_energy=9886.52,
@@ -18,6 +18,35 @@ mass.calibration.fluorescence_lines.addline(
     reference_amplitude=np.array((10, 5.3)),
     reference_amplitude_type=LORENTZIAN_PEAK_HEIGHT,
     ka12_energy_diff=31.1,
+)
+
+mass.calibration.fluorescence_lines.addline(
+    element="Ge",
+    material="metal",
+    linetype="KAlphaCustom",
+    reference_short="Zn Hack",
+    reference_plot_instrument_gaussian_fwhm=2.5,
+    nominal_peak_energy=9886.5,#9886.5,#9855.3,
+    energies=[9886.47,  9882.68, 9855.32, 9852.73],
+    lorentzian_fwhm=np.array((3.024, 3.68, 3.008, 3.26)),
+    reference_amplitude=np.array((100, 3.39, 50.54, 3.18)),
+    reference_amplitude_type=LORENTZIAN_PEAK_HEIGHT,
+    ka12_energy_diff=9886.47-9855.32,
+    position_uncertainty=.25
+)
+
+mass.calibration.fluorescence_lines.addline(
+    element="Ge",
+    material="metal",
+    linetype="KBetaCustom",
+    reference_short="Dean 2020",
+    reference_plot_instrument_gaussian_fwhm=2.5,
+    nominal_peak_energy=2/3*(10982.169)+1/3*(10977.961),
+    energies=np.array((10982.169, 10977.961, 10975.24, 10988.193, 11099.732)),  # Table 3 C_i
+    lorentzian_fwhm=np.array((4.2, 4.22, 4.2, 4.2, 4.2, 4.22)),  # Table 3 W_i
+    reference_amplitude=np.array((100, 44.9, 11.9, 8.08, 3.03)),  # Table 3 Fraction
+    reference_amplitude_type=LORENTZIAN_INTEGRAL_INTENSITY,
+    position_uncertainty=.1
 )
 
 # mass.calibration.fluorescence_lines.addline(

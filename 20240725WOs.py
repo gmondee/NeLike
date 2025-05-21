@@ -1,7 +1,7 @@
 import os
 import pylab as plt
 import numpy as np
-import pandas as pd
+# import pandas as pd
 import mass
 import sys
 from mass.off import ChannelGroup, Channel, getOffFileListFromOneFile
@@ -16,7 +16,10 @@ import CustomFluorescenceLines
 #filename = r"C:\Users\Grant Mondeel\Box\CfA\TES\Ne-Like\20240725_off\0000\20240725_run0000_chan1.off"
 
 #PC
-filename = r"C:\Users\lamat\Box\CfA\TES\Ne-Like\20240725_off\0000\20240725_run0000_chan1.off"
+#filename = r"C:\Users\lamat\Box\CfA\TES\Ne-Like\20240725_off\0000\20240725_run0000_chan1.off"
+
+#Mac
+filename = r"/Users/gmondeel/Documents/Mass/NeLikeData/20240725_off/0000/20240725_run0000_chan1.off"
 
 plt.ion()
 data = ChannelGroup(getOffFileListFromOneFile(filename, maxChans=999), verbose=True, channelClass = Channel, excludeStates=['IGNORE_OFF', 'IGNORE_ON', 'STOP'])
@@ -91,7 +94,7 @@ ds.calibrationPlanAddPoint(43589, "ZnKAlpha", states=calStates)
 #ds.calibrationPlanAddPoint(44639, "CuKBeta", states=calStates)
 # ds.calibrationPlanAddPoint(47220, "ZnKBeta", states=calStates)
 ds.calibrationPlanAddPoint(48428, "GeKAlphaCustom", states=calStates)
-ds.calibrationPlanAddPoint(52518, "GeKBeta", states=calStates)
+ds.calibrationPlanAddPoint(52518, "GeKBetaCustom", states=calStates)
 
 ### Check calibration on just one channel
 # ds.calibrateFollowingPlan("filtValue", calibratedName="energy", dlo=50, dhi=50, approximate=True, overwriteRecipe=True)
@@ -123,7 +126,7 @@ data[6].markBad("bad")
 #     data.qualityCheckLinefit(line, positionToleranceFitSigma=5, worstAllowedFWHM=16, states=statesDict["CalOn"], dlo=50, dhi=50)
 # plt.close()
 
-data.qualityCheckLinefit("ZnKAlpha", positionToleranceFitSigma=3, worstAllowedFWHM=10, states=statesDict["CalOn"], dlo=50, dhi=50)
+# data.qualityCheckLinefit("ZnKAlpha", positionToleranceFitSigma=3, worstAllowedFWHM=10, states=statesDict["CalOn"], dlo=50, dhi=50)
 
 data.plotHist(np.arange(800, 13000, 1.), "energy", states=statesDict["W_ON"], coAddStates=False)
 
