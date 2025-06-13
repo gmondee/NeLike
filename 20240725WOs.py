@@ -56,7 +56,8 @@ statesDict = {
     "W_OFF"   : ["F_OFF"],
     "W_ON"    : ["F_ON"],
     "Cal"     : ["I_OFF", "G_ON"],
-    "CalOn"   : ["I_OFF", "F_ON", "G_ON"]
+    "CalOn"   : ["I_OFF", "F_ON", "G_ON"],
+    "SciOrCal": ["G_OFF","F_OFF","I_OFF","G_ON"]
 }
 
 
@@ -80,10 +81,11 @@ def getPH(lineName): #See lines with mass.spectra and mass.STANDARD_FEATURES
 ds.calibrationPlanInit("filtValue")
 calStates = statesDict["Cal"]
 ds.calibrationPlanAddPoint(8915, "AlKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(15445, "ClKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(23280, "ScKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(25150, "ScKBeta", states=calStates)
 ds.calibrationPlanAddPoint(27544, "VKAlpha", states=calStates)
-ds.calibrationPlanAddPoint(29734, "VKBeta", states=calStates)
+# ds.calibrationPlanAddPoint(29734, "VKBeta", states=calStates) #Blended with CrKAlpha (CrKBeta observed too)
 ds.calibrationPlanAddPoint(31955, "MnKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(34235, "FeKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(36544, "CoKAlpha", states=calStates)
@@ -102,12 +104,12 @@ ds.calibrationPlanAddPoint(52518, "GeKBetaCustom", states=calStates)
 # ds.plotHist(np.arange(800, 12000, 1), "energy", states=["Cal"], coAddStates=False)
 
 data.alignToReferenceChannel(referenceChannel=ds,
-                            binEdges=np.arange(3000, 60000, 3), attr="filtValue")#, _rethrow=True)
+                            binEdges=np.arange(6000, 60000, 5), attr="filtValue")#, _rethrow=True)
 data.cutAdd("cutForLearnDC", lambda energyRough: np.logical_and(
 energyRough > 8000, energyRough < 10000), setDefault=False)
 
 ### Mass corrections.
-data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states=statesDict["CalOn"])#, cutRecipeName="cutForPC")
+data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states=statesDict["SciOrCal"])#, cutRecipeName="cutForPC")
 data.learnDriftCorrection(uncorrectedName="filtValuePC", indicatorName="pretriggerMean", correctedName="filtValueDC",
                             states=statesDict["CalOn"], cutRecipeName="cutForLearnDC")#, _rethrow=True)
 data.calibrateFollowingPlan("filtValueDC", calibratedName="energy", dlo=70, dhi=40, approximate=True, overwriteRecipe=True)
@@ -165,7 +167,7 @@ plt.legend(chan_range)
 #             e = mass.spectra[key]
 #         print(f'{key}\t\t{e} \n')
 
-if False:
+if True:
     WBinCenters, WData = data.hist(np.arange(800, 13000, 2.), "energy", states=statesDict["W_OFF"])
     import csv
     rows = zip(WBinCenters, WData)
@@ -190,11 +192,11 @@ fig = plt.figure()
 ax = fig.gca()
 data.plotHist(np.arange(800, 13000, 2.), "energy", states=statesDict["CalOn"], coAddStates=True, axis=ax)
 data.plotHist(np.arange(800, 13000, 2.), "energy", states=statesDict["Os_OFF"], coAddStates=False, axis=ax)
-plt.title("20240724 Os")
+plt.title("20240725 Os")
 
 fig = plt.figure()
 ax = fig.gca()
 #data.plotHist(np.arange(800, 13000, 2.), "energy", states=statesDict["CalOn"], coAddStates=True, axis=ax)
 data.plotHist(np.arange(800, 13000, 2.), "energy", states=statesDict["W_OFF"], coAddStates=False, axis=ax)
 #ds.plotHist(np.arange(800, 13000, 2.), "energy", states=statesDict["W_OFF"], coAddStates=False, axis=ax)
-plt.title("20240724 W")
+plt.title("20240725 W")

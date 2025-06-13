@@ -67,7 +67,8 @@ statesDict = {
     "Os_ON" : ["G_ON"],
     "Os_OFF" : ["G_OFF"],
     "Cal": ["START_OFF"],
-    "CalOn": ["START_OFF", "D_ON", "E_ON", "F_ON", "G_ON"] #states where the calibration source was turned on
+    "CalOn": ["START_OFF", "D_ON", "E_ON", "F_ON", "G_ON"], #states where the calibration source was turned on
+    "SciOrCal":["START_OFF", "B_OFF", "D_OFF", "E_OFF", "F_OFF", "G_OFF"]
 }
 
 
@@ -90,13 +91,14 @@ def getPH(lineName): #See lines with mass.spectra and mass.STANDARD_FEATURES
 
 ds.calibrationPlanInit("filtValue")
 calStates = statesDict["Cal"]
-ds.calibrationPlanAddPoint(7034, "MgKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(7034, "MgKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(8724, "AlKAlpha", states=calStates)
-ds.calibrationPlanAddPoint(13267, "SKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(14863, "ClKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(13267, "SKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(22563, "ScKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(24414, "ScKBeta", states=calStates)
 ds.calibrationPlanAddPoint(26826, "VKAlpha", states=calStates)
-ds.calibrationPlanAddPoint(29045, "VKBeta", states=calStates)
+# ds.calibrationPlanAddPoint(29045, "VKBeta", states=calStates) #Blended with CrKAlpha
 ds.calibrationPlanAddPoint(31316, "MnKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(33656, "FeKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(36015, "CoKAlpha", states=calStates)
@@ -115,13 +117,13 @@ ds.calibrationPlanAddPoint(52272, "GeKBetaCustom", states=calStates)
 # ds.plotHist(np.arange(800, 12000, 1), "energy", states=["Cal"], coAddStates=False)
 
 data.alignToReferenceChannel(referenceChannel=ds,
-                            binEdges=np.arange(3000, 60000, 5), attr="filtValue")#, _rethrow=True)
+                            binEdges=np.arange(6000, 60000, 5), attr="filtValue")#, _rethrow=True)
 data.cutAdd("cutForLearnDC", lambda energyRough: np.logical_and(
 energyRough > 8000, energyRough < 10000), setDefault=False)
 
 ### Mass corrections.
 # data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states="Cal")#, cutRecipeName="cutForPC")
-data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states=statesDict["Cal"])
+data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states=statesDict["SciOrCal"])
 data.learnDriftCorrection(uncorrectedName="filtValuePC", indicatorName="pretriggerMean", correctedName="filtValueDC",
                             states=statesDict["CalOn"], cutRecipeName="cutForLearnDC")#, _rethrow=True)
 data.calibrateFollowingPlan("filtValueDC", calibratedName="energy", dlo=50, dhi=40, approximate=True, overwriteRecipe=True)
