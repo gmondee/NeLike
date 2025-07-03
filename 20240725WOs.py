@@ -128,6 +128,11 @@ data[6].markBad("bad")
 #     data.qualityCheckLinefit(line, positionToleranceFitSigma=5, worstAllowedFWHM=16, states=statesDict["CalOn"], dlo=50, dhi=50)
 # plt.close()
 
+# calLines = ["ClKAlpha", "FeKAlpha","ZnKAlpha","GeKAlphaCustom"]
+# for line in calLines:
+#     data.qualityCheckLinefit(line, positionToleranceFitSigma=4, worstAllowedFWHM=15, states=statesDict["CalOn"], dlo=50, dhi=50)
+# plt.close()
+
 # data.qualityCheckLinefit("ZnKAlpha", positionToleranceFitSigma=3, worstAllowedFWHM=10, states=statesDict["CalOn"], dlo=50, dhi=50)
 
 data.plotHist(np.arange(800, 13000, 1.), "energy", states=statesDict["W_ON"], coAddStates=False)

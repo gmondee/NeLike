@@ -126,7 +126,7 @@ energyRough > 8000, energyRough < 10000), setDefault=False)
 data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states=statesDict["SciOrCal"])
 data.learnDriftCorrection(uncorrectedName="filtValuePC", indicatorName="pretriggerMean", correctedName="filtValueDC",
                             states=statesDict["CalOn"], cutRecipeName="cutForLearnDC")#, _rethrow=True)
-data.calibrateFollowingPlan("filtValueDC", calibratedName="energy", dlo=50, dhi=40, approximate=True, overwriteRecipe=True)
+data.calibrateFollowingPlan("filtValueDC", calibratedName="energy", dlo=30, dhi=40, approximate=True, overwriteRecipe=True)
 #data.qualityCheckLinefit("ZnKAlpha", positionToleranceFitSigma=3, worstAllowedFWHM=10, states=statesDict["Cal"], dlo=70, dhi=40)
 ds.diagnoseCalibration()
 data[6].markBad("bad")
@@ -134,11 +134,12 @@ data[6].markBad("bad")
 
 # calLines = ["AlKAlpha","ScKAlpha","VKAlpha","MnKAlpha",
 #             "FeKAlpha","CoKAlpha","CuKAlpha"]#,"ZnKAlpha","GeKAlphaCustom"]
-# for line in calLines:
-#     data.qualityCheckLinefit(line, positionToleranceFitSigma=2, worstAllowedFWHM=14, states="Cal", dlo=50, dhi=50)
-# plt.close()
+calLines = ["ClKAlpha", "FeKAlpha","ZnKAlpha","GeKAlphaCustom"]
+for line in calLines:
+    data.qualityCheckLinefit(line, positionToleranceFitSigma=4, worstAllowedFWHM=15, states=statesDict["CalOn"], dlo=50, dhi=50)
+plt.close()
 
-data.plotHist(np.arange(800, 13000, 1.), "energy", states=statesDict["CalOn"], coAddStates=False)
+data.plotHist(np.arange(800, 13000, 1.), "energy", states=statesDict["Cal"], coAddStates=False)
 
 fig = plt.figure()
 ax = fig.gca()
