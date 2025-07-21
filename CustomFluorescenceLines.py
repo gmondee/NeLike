@@ -76,3 +76,61 @@ mass.calibration.fluorescence_lines.addline(
 #     reference_amplitude_type=LORENTZIAN_PEAK_HEIGHT,
 #     ka12_energy_diff=31.1,
 # )
+
+
+# W lines from beiersdorfer 2012
+mass.calibration.fluorescence_lines.addline(
+    element="W",
+    material="metal",
+    linetype="M2",
+    reference_short="Zn Hack", #Beiersdorfer 2012",
+    # fitter_type=mass.calibration.line_models.GenericLineModel,
+    reference_plot_instrument_gaussian_fwhm=0.5,
+    nominal_peak_energy=8299.22,
+    energies=np.array((8299.22,)),
+    lorentzian_fwhm=np.array((1,)),  # Table 3 W_i
+    reference_amplitude=np.array((1,)),  # Table 3 Fraction
+    reference_amplitude_type=LORENTZIAN_INTEGRAL_INTENSITY,
+    position_uncertainty=.4
+)
+
+mass.calibration.fluorescence_lines.addline(
+    element="W",
+    material="metal",
+    linetype="3G",
+    reference_short="Zn Hack", #Beiersdorfer 2012",
+    reference_plot_instrument_gaussian_fwhm=0.5,
+    nominal_peak_energy=8307.51,
+    energies=np.array((8307.51,)),
+    lorentzian_fwhm=np.array((1,)),  # Table 3 W_i
+    reference_amplitude=np.array((1,)),  # Table 3 Fraction
+    reference_amplitude_type=LORENTZIAN_INTEGRAL_INTENSITY,
+    position_uncertainty=.4
+)
+
+mass.calibration.fluorescence_lines.addline(
+    element="W",
+    material="metal",
+    linetype="3D",
+    reference_short="Zn Hack", #Beiersdorfer 2012",
+    reference_plot_instrument_gaussian_fwhm=0.5,
+    nominal_peak_energy=9126.25,
+    energies=np.array((9126.25,)),
+    lorentzian_fwhm=np.array((1,)),  # Table 3 W_i
+    reference_amplitude=np.array((1,)),  # Table 3 Fraction
+    reference_amplitude_type=LORENTZIAN_INTEGRAL_INTENSITY,
+    position_uncertainty=.5
+)
+
+# element=element,
+# material="Highly Charged Ion",
+# linetype=linetype,
+# reference_short='NIST ASD',
+# fitter_type=line_models.GenericLineModel,
+# reference_plot_instrument_gaussian_fwhm=0.5,
+# nominal_peak_energy=nominal_peak_energy,
+# energies=energies,
+# lorentzian_fwhm=widths,
+# reference_amplitude=ratios,
+# reference_amplitude_type=LORENTZIAN_PEAK_HEIGHT,
+# ka12_energy_diff=None

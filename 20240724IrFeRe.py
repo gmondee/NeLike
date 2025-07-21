@@ -75,15 +75,15 @@ ds.calibrationPlanAddPoint(26826, "VKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(31300, "MnKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(33600, "FeKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(36015, "CoKAlpha", states=calStates)
-# ds.calibrationPlanAddPoint(36575, "FeKBeta", states=calStates)
-# ds.calibrationPlanAddPoint(39140, "CoKBeta", states=calStates)
-# ds.calibrationPlanAddPoint(40827, "CuKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(36575, "FeKBeta", states=calStates) #<10 counts
+# ds.calibrationPlanAddPoint(39140, "CoKBeta", states=calStates) #<5 counts
+ds.calibrationPlanAddPoint(40827, "CuKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(43120, "ZnKAlpha", states=calStates)
-# # ds.calibrationPlanAddPoint(44335, "CuKBeta", states=calStates)
+# ds.calibrationPlanAddPoint(44335, "CuKBeta", states=calStates)
 ds.calibrationPlanAddPoint(47040, "ZnKBeta", states=calStates)
 ds.calibrationPlanAddPoint(48125, "GeKAlphaCustom", states=calStates)
-ds.calibrationPlanAddPoint(52189, "GeKBeta", states=calStates)
-# ds.calibrationPlanAddPoint(52314, "GeKBetaCustom", states="START_OFF")
+# ds.calibrationPlanAddPoint(52189, "GeKBeta", states=calStates)
+ds.calibrationPlanAddPoint(52181, "GeKBetaCustom", states=["G_OFF","I_ON"])#calStates)
 ### Check calibration on just one channel
 # ds.calibrateFollowingPlan("filtValue", calibratedName="energy", dlo=50, dhi=50, approximate=True, overwriteRecipe=True)
 # ds.diagnoseCalibration()
@@ -92,14 +92,14 @@ ds.calibrationPlanAddPoint(52189, "GeKBeta", states=calStates)
 data.alignToReferenceChannel(referenceChannel=ds,
                             binEdges=np.arange(6000, 60000, 5), attr="filtValue")#, _rethrow=True)
 data.cutAdd("cutForLearnDC", lambda energyRough: np.logical_and(
-energyRough > 8000, energyRough < 11000), setDefault=False)
+energyRough > 2500, energyRough < 11500), setDefault=False) #cut off at 9900 because of diffraction features at 10-11kev
 
 ### Mass corrections.
 # data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states="Cal")#, cutRecipeName="cutForPC")
 data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states=statesDict["SciOrCal"])
 data.learnDriftCorrection(uncorrectedName="filtValuePC", indicatorName="pretriggerMean", correctedName="filtValueDC",
                             states=statesDict["CalOn"], cutRecipeName="cutForLearnDC")#, _rethrow=True)
-data.calibrateFollowingPlan("filtValueDC", calibratedName="energy", dlo=70, dhi=70, approximate=True, overwriteRecipe=True)
+data.calibrateFollowingPlan("filtValueDC", calibratedName="energy", dlo=30, dhi=40, approximate=True, overwriteRecipe=True)
 # data.qualityCheckLinefit("ZnKAlpha", positionToleranceFitSigma=3, worstAllowedFWHM=10, states=statesDict["Cal"], dlo=70, dhi=40)
 ds.diagnoseCalibration()
 data[6].markBad("bad")
@@ -111,11 +111,31 @@ data[6].markBad("bad")
 #     data.qualityCheckLinefit(line, positionToleranceFitSigma=2, worstAllowedFWHM=14, states=statesDict["Cal"], dlo=50, dhi=50)
 # plt.close()
 
-calLines = ["ClKAlpha", "FeKAlpha","ZnKAlpha","GeKAlphaCustom"]
-for line in calLines:
-    data.qualityCheckLinefit(line, positionToleranceFitSigma=4, worstAllowedFWHM=15, states=statesDict["CalOn"], dlo=50, dhi=50)
-plt.close()
 
+#Filter out bad channels using lines that we expect to have low calibration uncertainties relative to statistical. 
+# Strong lines like ClKAlpha have very low stat unc on individual channels and the cal uncertainty scatters them. 
+# However, the summed spectrum still agrees within 1sigma of stat unc. Thus, it doesn't make sense to filter on ClKAlpha.
+calibratedChannels = data.keys()
+#Do ClKAlpha separately because it has very good statistics relative to calibration uncertainty
+data.qualityCheckLinefit("ClKAlpha", positionToleranceFitSigma=10, worstAllowedFWHM=15, states=statesDict["CalOn"], dlo=30, dhi=30)
+# calLines = ["ZnKAlpha","GeKAlphaCustom"]
+# for line in calLines:
+#     data.qualityCheckLinefit(line, positionToleranceFitSigma=5, worstAllowedFWHM=15, states=statesDict["CalOn"], dlo=30, dhi=30)
+# plt.close()
+goodChannels = data.keys()
+
+data.qualityCheckLinefit("ZnKAlpha", positionToleranceFitSigma=10, worstAllowedFWHM=15, states=statesDict["CalOn"], dlo=40, dhi=15)
+
+#GeKAlpha is double-peaked, so we do a wider fit
+data.qualityCheckLinefit("GeKAlphaCustom", positionToleranceFitSigma=6, worstAllowedFWHM=15, states=statesDict["CalOn"], dlo=50, dhi=25)
+
+def restoreChannels():
+    for channum in calibratedChannels:
+        data[channum].markGood()
+
+for ch in data.keys()[0:7]:
+    data[ch].linefit('ClKAlpha', states=statesDict['CalOn'])
+# data.qualityCheckLinefit("ClKAlpha", positionToleranceFitSigma=5, worstAllowedFWHM=15, states=statesDict["CalOn"], dlo=30, dhi=30)
 data.plotHist(np.arange(800, 13000, 1.), "energy", states=statesDict["CalOn"], coAddStates=False)
 
 fig = plt.figure()

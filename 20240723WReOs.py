@@ -91,6 +91,9 @@ def getPH(lineName): #See lines with mass.spectra and mass.STANDARD_FEATURES
 
 ds.calibrationPlanInit("filtValue")
 calStates = statesDict["Cal"]
+
+### Identify calibration lines
+### W lines from beiersdorfer 2012
 # ds.calibrationPlanAddPoint(7034, "MgKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(8724, "AlKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(14863, "ClKAlpha", states=calStates)
@@ -105,11 +108,19 @@ ds.calibrationPlanAddPoint(36015, "CoKAlpha", states=calStates)
 # ds.calibrationPlanAddPoint(36575, "FeKBeta", states=calStates)
 # ds.calibrationPlanAddPoint(39140, "CoKBeta", states=calStates)
 ds.calibrationPlanAddPoint(40827, "CuKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(41820, "WM2", states=statesDict["W_OFF"]) # 8299.22 eV, might not be not enough counts
+# ds.calibrationPlanAddPoint(41858, "W3G", states=statesDict["W_OFF"]) # 8307.51 eV, has more counts but might get confused by M2 during fit
 ds.calibrationPlanAddPoint(43265, "ZnKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(45173, "W3D", states=statesDict["W_OFF"]) # 9126.25 eV, only a few counts per channel but should be isolated
 # # ds.calibrationPlanAddPoint(44335, "CuKBeta", states=calStates)
 ds.calibrationPlanAddPoint(46963, "ZnKBeta", states=calStates)
 ds.calibrationPlanAddPoint(48184, "GeKAlphaCustom", states=calStates)
 ds.calibrationPlanAddPoint(52272, "GeKBetaCustom", states=calStates)
+
+
+
+
+
 
 ### Check calibration on just one channel
 # ds.calibrateFollowingPlan("filtValue", calibratedName="energy", dlo=50, dhi=50, approximate=True, overwriteRecipe=True)
@@ -136,7 +147,7 @@ data[6].markBad("bad")
 #             "FeKAlpha","CoKAlpha","CuKAlpha"]#,"ZnKAlpha","GeKAlphaCustom"]
 calLines = ["ClKAlpha", "FeKAlpha","ZnKAlpha","GeKAlphaCustom"]
 for line in calLines:
-    data.qualityCheckLinefit(line, positionToleranceFitSigma=4, worstAllowedFWHM=15, states=statesDict["CalOn"], dlo=50, dhi=50)
+    data.qualityCheckLinefit(line, positionToleranceFitSigma=5, worstAllowedFWHM=15, states=statesDict["CalOn"], dlo=30, dhi=30)
 plt.close()
 
 data.plotHist(np.arange(800, 13000, 1.), "energy", states=statesDict["Cal"], coAddStates=False)
@@ -167,6 +178,9 @@ plt.legend(chan_range)
 # #germanium keys 
 # ge = [k for k, v in mass.STANDARD_FEATURES.items() if "Ge" in k]
 # ge.extend([k for k, v in mass.spectra.items() if "Ge" in k])
+
+W = [k for k, v in mass.STANDARD_FEATURES.items() if "W" in k]
+W.extend([k for k, v in mass.spectra.items() if "W" in k])
 
 # def keys_energies(keys):
 #     for key in keys:

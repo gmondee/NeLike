@@ -80,6 +80,8 @@ def getPH(lineName): #See lines with mass.spectra and mass.STANDARD_FEATURES
 
 ds.calibrationPlanInit("filtValue")
 calStates = statesDict["Cal"]
+### Identify calibration lines
+### W lines from beiersdorfer 2012
 ds.calibrationPlanAddPoint(8915, "AlKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(15445, "ClKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(23280, "ScKAlpha", states=calStates)
@@ -93,6 +95,7 @@ ds.calibrationPlanAddPoint(36544, "CoKAlpha", states=calStates)
 # ds.calibrationPlanAddPoint(39560, "CoKBeta", states=calStates)
 ds.calibrationPlanAddPoint(41177, "CuKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(43589, "ZnKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(45571, "W3D", states=statesDict["W_OFF"]) # 9126.25 eV, only a few counts per channel but should be isolated
 #ds.calibrationPlanAddPoint(44639, "CuKBeta", states=calStates)
 # ds.calibrationPlanAddPoint(47220, "ZnKBeta", states=calStates)
 ds.calibrationPlanAddPoint(48428, "GeKAlphaCustom", states=calStates)
@@ -112,7 +115,7 @@ energyRough > 8000, energyRough < 10000), setDefault=False)
 data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states=statesDict["SciOrCal"])#, cutRecipeName="cutForPC")
 data.learnDriftCorrection(uncorrectedName="filtValuePC", indicatorName="pretriggerMean", correctedName="filtValueDC",
                             states=statesDict["CalOn"], cutRecipeName="cutForLearnDC")#, _rethrow=True)
-data.calibrateFollowingPlan("filtValueDC", calibratedName="energy", dlo=70, dhi=40, approximate=True, overwriteRecipe=True)
+data.calibrateFollowingPlan("filtValueDC", calibratedName="energy", dlo=30, dhi=40, approximate=True, overwriteRecipe=True)
 #data.qualityCheckLinefit("CuKAlpha", positionToleranceFitSigma=2, worstAllowedFWHM=12, states="Cal", dlo=50, dhi=40)
 ds.diagnoseCalibration()
 data[6].markBad("bad")
@@ -128,10 +131,10 @@ data[6].markBad("bad")
 #     data.qualityCheckLinefit(line, positionToleranceFitSigma=5, worstAllowedFWHM=16, states=statesDict["CalOn"], dlo=50, dhi=50)
 # plt.close()
 
-# calLines = ["ClKAlpha", "FeKAlpha","ZnKAlpha","GeKAlphaCustom"]
-# for line in calLines:
-#     data.qualityCheckLinefit(line, positionToleranceFitSigma=4, worstAllowedFWHM=15, states=statesDict["CalOn"], dlo=50, dhi=50)
-# plt.close()
+calLines = ["ClKAlpha", "FeKAlpha","ZnKAlpha","GeKAlphaCustom"]
+for line in calLines:
+    data.qualityCheckLinefit(line, positionToleranceFitSigma=5, worstAllowedFWHM=15, states=statesDict["CalOn"], dlo=30, dhi=30)
+plt.close()
 
 # data.qualityCheckLinefit("ZnKAlpha", positionToleranceFitSigma=3, worstAllowedFWHM=10, states=statesDict["CalOn"], dlo=50, dhi=50)
 
