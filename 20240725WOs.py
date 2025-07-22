@@ -82,11 +82,14 @@ ds.calibrationPlanInit("filtValue")
 calStates = statesDict["Cal"]
 ### Identify calibration lines
 ### W lines from beiersdorfer 2012
-ds.calibrationPlanAddPoint(8915, "AlKAlpha", states=calStates)
-ds.calibrationPlanAddPoint(15445, "ClKAlpha", states=calStates)
-ds.calibrationPlanAddPoint(23280, "ScKAlpha", states=calStates)
-ds.calibrationPlanAddPoint(25150, "ScKBeta", states=calStates)
-ds.calibrationPlanAddPoint(27544, "VKAlpha", states=calStates)
+
+#good but too low energy
+# ds.calibrationPlanAddPoint(8915, "AlKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(15445, "ClKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(23280, "ScKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(25150, "ScKBeta", states=calStates)
+# ds.calibrationPlanAddPoint(27544, "VKAlpha", states=calStates)
+
 # ds.calibrationPlanAddPoint(29734, "VKBeta", states=calStates) #Blended with CrKAlpha (CrKBeta observed too)
 ds.calibrationPlanAddPoint(31955, "MnKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(34235, "FeKAlpha", states=calStates)
@@ -131,11 +134,13 @@ data[6].markBad("bad")
 #     data.qualityCheckLinefit(line, positionToleranceFitSigma=5, worstAllowedFWHM=16, states=statesDict["CalOn"], dlo=50, dhi=50)
 # plt.close()
 
-calLines = ["ClKAlpha", "FeKAlpha","ZnKAlpha","GeKAlphaCustom"]
-for line in calLines:
-    data.qualityCheckLinefit(line, positionToleranceFitSigma=5, worstAllowedFWHM=15, states=statesDict["CalOn"], dlo=30, dhi=30)
-plt.close()
+# calLines = ["ClKAlpha", "FeKAlpha","ZnKAlpha","GeKAlphaCustom"]
+# for line in calLines:
+#     data.qualityCheckLinefit(line, positionToleranceFitSigma=5, worstAllowedFWHM=15, states=statesDict["CalOn"], dlo=30, dhi=30)
+# plt.close()
 
+data.qualityCheckLinefit("ZnKAlpha", positionToleranceFitSigma=7, worstAllowedFWHM=15, states=statesDict["CalOn"], dlo=30, dhi=30)
+data.qualityCheckLinefit("W3D", positionToleranceFitSigma=7, worstAllowedFWHM=15, states=statesDict["W_OFF"], dlo=30, dhi=30)
 # data.qualityCheckLinefit("ZnKAlpha", positionToleranceFitSigma=3, worstAllowedFWHM=10, states=statesDict["CalOn"], dlo=50, dhi=50)
 
 data.plotHist(np.arange(800, 13000, 1.), "energy", states=statesDict["W_ON"], coAddStates=False)
@@ -176,7 +181,8 @@ plt.legend(chan_range)
 #         print(f'{key}\t\t{e} \n')
 
 if True:
-    WBinCenters, WData = data.hist(np.arange(800, 13000, 2.), "energy", states=statesDict["W_OFF"])
+    binsize=1
+    WBinCenters, WData = data.hist(np.arange(800, 13000, binsize), "energy", states=statesDict["W_OFF"])
     import csv
     rows = zip(WBinCenters, WData)
     with open("W_20240725.txt", "w", newline='') as f:
@@ -185,7 +191,7 @@ if True:
         for row in rows:
             writer.writerow(row)
 
-    OsBinCenters, OsData = data.hist(np.arange(800, 13000, 2.), "energy", states=statesDict["Os_OFF"])
+    OsBinCenters, OsData = data.hist(np.arange(800, 13000, binsize), "energy", states=statesDict["Os_OFF"])
     rows = zip(OsBinCenters, OsData)
     with open("Os_20240725.txt", "w", newline='') as f:
         writer = csv.writer(f)

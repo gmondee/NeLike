@@ -66,9 +66,9 @@ statesDict = {
     "Re_OFF" : ["E_OFF", "F_OFF"],
     "Os_ON" : ["G_ON"],
     "Os_OFF" : ["G_OFF"],
-    "Cal": ["START_OFF"],
-    "CalOn": ["START_OFF", "D_ON", "E_ON", "F_ON", "G_ON"], #states where the calibration source was turned on
-    "SciOrCal":["START_OFF", "B_OFF", "D_OFF", "E_OFF", "F_OFF", "G_OFF"]
+    "Cal": ["E_ON"],#"START_OFF"],
+    "CalOn": ["D_ON", "E_ON", "F_ON", "G_ON"], #states where the calibration source was turned on except START because of huge drift
+    "SciOrCal":["B_OFF", "D_OFF", "E_OFF", "F_OFF", "G_OFF", "D_ON", "E_ON", "F_ON", "G_ON"]
 }
 
 
@@ -94,14 +94,18 @@ calStates = statesDict["Cal"]
 
 ### Identify calibration lines
 ### W lines from beiersdorfer 2012
-# ds.calibrationPlanAddPoint(7034, "MgKAlpha", states=calStates)
-ds.calibrationPlanAddPoint(8724, "AlKAlpha", states=calStates)
-ds.calibrationPlanAddPoint(14863, "ClKAlpha", states=calStates)
-# ds.calibrationPlanAddPoint(13267, "SKAlpha", states=calStates)
-ds.calibrationPlanAddPoint(22563, "ScKAlpha", states=calStates)
-ds.calibrationPlanAddPoint(24414, "ScKBeta", states=calStates)
-ds.calibrationPlanAddPoint(26826, "VKAlpha", states=calStates)
-# ds.calibrationPlanAddPoint(29045, "VKBeta", states=calStates) #Blended with CrKAlpha
+
+#too low e
+# # ds.calibrationPlanAddPoint(7034, "MgKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(8724, "AlKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(14863, "ClKAlpha", states=calStates)
+# # ds.calibrationPlanAddPoint(13267, "SKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(22563, "ScKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(24414, "ScKBeta", states=calStates)
+# ds.calibrationPlanAddPoint(26826, "VKAlpha", states=calStates)
+# # ds.calibrationPlanAddPoint(29045, "VKBeta", states=calStates) #Blended with CrKAlpha
+
+
 ds.calibrationPlanAddPoint(31316, "MnKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(33656, "FeKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(36015, "CoKAlpha", states=calStates)
@@ -131,12 +135,16 @@ data.alignToReferenceChannel(referenceChannel=ds,
                             binEdges=np.arange(6000, 60000, 5), attr="filtValue")#, _rethrow=True)
 data.cutAdd("cutForLearnDC", lambda energyRough: np.logical_and(
 energyRough > 8000, energyRough < 10000), setDefault=False)
+data.cutAdd("cutForLearnDC_W", lambda energyRough: np.logical_and(
+energyRough > 9000, energyRough < 9300), setDefault=False)
 
 ### Mass corrections.
 # data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states="Cal")#, cutRecipeName="cutForPC")
 data.learnPhaseCorrection(indicatorName="filtPhase", uncorrectedName="filtValue", correctedName = "filtValuePC", states=statesDict["SciOrCal"])
 data.learnDriftCorrection(uncorrectedName="filtValuePC", indicatorName="pretriggerMean", correctedName="filtValueDC",
                             states=statesDict["CalOn"], cutRecipeName="cutForLearnDC")#, _rethrow=True)
+# data.learnDriftCorrection(uncorrectedName="filtValueDC", indicatorName="pretriggerMean", correctedName="filtValueDC_W",
+#                             states=statesDict["W_OFF"], cutRecipeName="cutForLearnDC_W")#, _rethrow=True)
 data.calibrateFollowingPlan("filtValueDC", calibratedName="energy", dlo=30, dhi=40, approximate=True, overwriteRecipe=True)
 #data.qualityCheckLinefit("ZnKAlpha", positionToleranceFitSigma=3, worstAllowedFWHM=10, states=statesDict["Cal"], dlo=70, dhi=40)
 ds.diagnoseCalibration()
@@ -145,11 +153,14 @@ data[6].markBad("bad")
 
 # calLines = ["AlKAlpha","ScKAlpha","VKAlpha","MnKAlpha",
 #             "FeKAlpha","CoKAlpha","CuKAlpha"]#,"ZnKAlpha","GeKAlphaCustom"]
-calLines = ["ClKAlpha", "FeKAlpha","ZnKAlpha","GeKAlphaCustom"]
-for line in calLines:
-    data.qualityCheckLinefit(line, positionToleranceFitSigma=5, worstAllowedFWHM=15, states=statesDict["CalOn"], dlo=30, dhi=30)
-plt.close()
 
+# calLines = ["ClKAlpha", "FeKAlpha","ZnKAlpha","GeKAlphaCustom"]
+# for line in calLines:
+#     data.qualityCheckLinefit(line, positionToleranceFitSigma=5, worstAllowedFWHM=15, states=statesDict["CalOn"], dlo=30, dhi=30)
+# plt.close()
+
+data.qualityCheckLinefit("ZnKAlpha", positionToleranceFitSigma=7, worstAllowedFWHM=15, states=statesDict["CalOn"], dlo=30, dhi=30)
+data.qualityCheckLinefit("W3D", positionToleranceFitSigma=7, worstAllowedFWHM=15, states=statesDict["W_OFF"], dlo=30, dhi=30)
 data.plotHist(np.arange(800, 13000, 1.), "energy", states=statesDict["Cal"], coAddStates=False)
 
 fig = plt.figure()
@@ -191,7 +202,8 @@ W.extend([k for k, v in mass.spectra.items() if "W" in k])
 #         print(f'{key}\t\t{e} \n')
 
 if True:
-    WBinCenters, WData = data.hist(np.arange(800, 13000, 2.), "energy", states=statesDict["W_OFF"])
+    binsize=1
+    WBinCenters, WData = data.hist(np.arange(800, 13000, binsize), "energy", states=statesDict["W_OFF"])
     import csv
     rows = zip(WBinCenters, WData)
     with open("W_20240723.txt", "w", newline='') as f:
@@ -200,7 +212,7 @@ if True:
         for row in rows:
             writer.writerow(row)
 
-    OsBinCenters, OsData = data.hist(np.arange(800, 13000, 2.), "energy", states=statesDict["Os_OFF"])
+    OsBinCenters, OsData = data.hist(np.arange(800, 13000, binsize), "energy", states=statesDict["Os_OFF"])
     rows = zip(OsBinCenters, OsData)
     with open("Os_20240723.txt", "w", newline='') as f:
         writer = csv.writer(f)
@@ -208,7 +220,7 @@ if True:
         for row in rows:
             writer.writerow(row)
 
-    ReBinCenters, ReData = data.hist(np.arange(800, 13000, 2.), "energy", states=statesDict["Re_OFF"])
+    ReBinCenters, ReData = data.hist(np.arange(800, 13000, binsize), "energy", states=statesDict["Re_OFF"])
     rows = zip(ReBinCenters, ReData)
     with open("Re_20240723.txt", "w", newline='') as f:
         writer = csv.writer(f)
