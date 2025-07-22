@@ -66,12 +66,15 @@ def getPH(lineName): #See lines with mass.spectra and mass.STANDARD_FEATURES
 
 ds.calibrationPlanInit("filtValue")
 calStates = statesDict["Cal"]
-ds.calibrationPlanAddPoint(8724, "AlKAlpha", states=calStates)
-ds.calibrationPlanAddPoint(14982, "ClKAlpha", states=calStates)
-ds.calibrationPlanAddPoint(22563, "ScKAlpha", states=calStates)
-# ds.calibrationPlanAddPoint(24414, "ScKBeta", states=calStates)
-ds.calibrationPlanAddPoint(26826, "VKAlpha", states=calStates)
-# ds.calibrationPlanAddPoint(29016, "VKBeta", states=calStates) #Blended with CrKAlpha
+
+#much lower energy
+# ds.calibrationPlanAddPoint(8724, "AlKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(14982, "ClKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(22563, "ScKAlpha", states=calStates)
+# # ds.calibrationPlanAddPoint(24414, "ScKBeta", states=calStates)
+# ds.calibrationPlanAddPoint(26826, "VKAlpha", states=calStates)
+# # ds.calibrationPlanAddPoint(29016, "VKBeta", states=calStates) #Blended with CrKAlpha
+
 ds.calibrationPlanAddPoint(31300, "MnKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(33600, "FeKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(36015, "CoKAlpha", states=calStates)
@@ -178,7 +181,8 @@ plt.legend(chan_range)
 
 if True:
     import csv
-    IrBinCenters, IrData = data.hist(np.arange(800, 13000, 2.), "energy", states=statesDict["Ir_OFF"])
+    binsize=1.
+    IrBinCenters, IrData = data.hist(np.arange(800, 13000, binsize), "energy", states=statesDict["Ir_OFF"])
     rows = zip(IrBinCenters, IrData)
     with open("Ir_20240724.txt", "w", newline='') as f:
         writer = csv.writer(f)

@@ -97,6 +97,7 @@ ds.calibrationPlanAddPoint(36544, "CoKAlpha", states=calStates)
 # ds.calibrationPlanAddPoint(37015, "FeKBeta", states=calStates)
 # ds.calibrationPlanAddPoint(39560, "CoKBeta", states=calStates)
 ds.calibrationPlanAddPoint(41177, "CuKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(42278, "WM2+3G_25", states=statesDict["W_OFF"])
 ds.calibrationPlanAddPoint(43589, "ZnKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(45571, "W3D", states=statesDict["W_OFF"]) # 9126.25 eV, only a few counts per channel but should be isolated
 #ds.calibrationPlanAddPoint(44639, "CuKBeta", states=calStates)

@@ -106,20 +106,22 @@ calStates = statesDict["Cal"]
 # # ds.calibrationPlanAddPoint(29045, "VKBeta", states=calStates) #Blended with CrKAlpha
 
 
-ds.calibrationPlanAddPoint(31316, "MnKAlpha", states=calStates)
-ds.calibrationPlanAddPoint(33656, "FeKAlpha", states=calStates)
-ds.calibrationPlanAddPoint(36015, "CoKAlpha", states=calStates)
-# ds.calibrationPlanAddPoint(36575, "FeKBeta", states=calStates)
-# ds.calibrationPlanAddPoint(39140, "CoKBeta", states=calStates)
-ds.calibrationPlanAddPoint(40827, "CuKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(31263, "MnKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(33600, "FeKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(35955, "CoKAlpha", states=calStates)
+# ds.calibrationPlanAddPoint(36515, "FeKBeta", states=calStates)#low counts
+# ds.calibrationPlanAddPoint(39106, "CoKBeta", states=calStates)#low counts
+ds.calibrationPlanAddPoint(40767, "CuKAlpha", states=calStates)
+
+ds.calibrationPlanAddPoint(41840, "WM2+3G_23", states=statesDict["W_OFF"])
 # ds.calibrationPlanAddPoint(41820, "WM2", states=statesDict["W_OFF"]) # 8299.22 eV, might not be not enough counts
 # ds.calibrationPlanAddPoint(41858, "W3G", states=statesDict["W_OFF"]) # 8307.51 eV, has more counts but might get confused by M2 during fit
-ds.calibrationPlanAddPoint(43265, "ZnKAlpha", states=calStates)
+ds.calibrationPlanAddPoint(43193, "ZnKAlpha", states=calStates)
 ds.calibrationPlanAddPoint(45173, "W3D", states=statesDict["W_OFF"]) # 9126.25 eV, only a few counts per channel but should be isolated
 # # ds.calibrationPlanAddPoint(44335, "CuKBeta", states=calStates)
-ds.calibrationPlanAddPoint(46963, "ZnKBeta", states=calStates)
-ds.calibrationPlanAddPoint(48184, "GeKAlphaCustom", states=calStates)
-ds.calibrationPlanAddPoint(52272, "GeKBetaCustom", states=calStates)
+ds.calibrationPlanAddPoint(46908, "ZnKBeta", states=calStates)
+ds.calibrationPlanAddPoint(48105, "GeKAlphaCustom", states=calStates)
+ds.calibrationPlanAddPoint(52207, "GeKBetaCustom", states=calStates)
 
 
 
@@ -160,7 +162,7 @@ data[6].markBad("bad")
 # plt.close()
 
 data.qualityCheckLinefit("ZnKAlpha", positionToleranceFitSigma=7, worstAllowedFWHM=15, states=statesDict["CalOn"], dlo=30, dhi=30)
-data.qualityCheckLinefit("W3D", positionToleranceFitSigma=7, worstAllowedFWHM=15, states=statesDict["W_OFF"], dlo=30, dhi=30)
+# data.qualityCheckLinefit("W3D", positionToleranceFitSigma=7, worstAllowedFWHM=15, states=statesDict["W_OFF"], dlo=30, dhi=30) #shouldnt filter on this because too low counts
 data.plotHist(np.arange(800, 13000, 1.), "energy", states=statesDict["Cal"], coAddStates=False)
 
 fig = plt.figure()

@@ -122,6 +122,33 @@ mass.calibration.fluorescence_lines.addline(
     position_uncertainty=.5
 )
 
+mass.calibration.fluorescence_lines.addline( #1:1.5 intensity
+    element="W",
+    material="metal",
+    linetype="M2+3G_23",
+    reference_short="Dean 2020",
+    reference_plot_instrument_gaussian_fwhm=0.5,
+    nominal_peak_energy=1/2*(8299.22)+1/2*(8307.51),
+    energies=np.array((8299.22, 8307.51)), 
+    lorentzian_fwhm=np.array((4,4)), 
+    reference_amplitude=np.array((100,150)),  # Table 3 Fraction
+    reference_amplitude_type=LORENTZIAN_INTEGRAL_INTENSITY,
+    position_uncertainty=.5
+)
+
+mass.calibration.fluorescence_lines.addline( #1:1 intensity
+    element="W",
+    material="metal",
+    linetype="M2+3G_25",
+    reference_short="Dean 2020",
+    reference_plot_instrument_gaussian_fwhm=0.5,
+    nominal_peak_energy=1/2*(8299.22)+1/2*(8307.51),
+    energies=np.array((8299.22, 8307.51)), 
+    lorentzian_fwhm=np.array((4,4)), 
+    reference_amplitude=np.array((100,100)),  # Table 3 Fraction
+    reference_amplitude_type=LORENTZIAN_INTEGRAL_INTENSITY,
+    position_uncertainty=.5
+)
 # element=element,
 # material="Highly Charged Ion",
 # linetype=linetype,

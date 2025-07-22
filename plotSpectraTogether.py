@@ -63,12 +63,64 @@ def fit_multiple_gaussians(x, y, centroids, sigma_guess=1.0):
     return result, model
 
 
+def fit_peak_in_window(x, y, center_guess, window=6.0, sigma_guess=1.0):
+    """
+    Fit a single Gaussian to a spectrum using a local window.
+
+    Parameters:
+        x (np.array): x-data (wavelength, energy, etc.)
+        y (np.array): y-data (intensity)
+        center_guess (float): approximate center of the peak
+        window (float): half-width of the fitting region
+        sigma_guess (float): initial guess for the width (sigma)
+
+    Returns:
+        result (ModelResult): lmfit result object for this peak
+        x_win (np.array): local x data used for the fit
+        y_win (np.array): local y data used for the fit
+    """
+    mask = (x > center_guess - window) & (x < center_guess + window)
+    x_win = x[mask]
+    y_win = y[mask]
+
+    model = GaussianModel()
+    params = model.make_params(
+        amplitude=np.max(y_win),
+        center=center_guess,
+        sigma=sigma_guess
+    )
+    params['amplitude'].min = 0
+    params['sigma'].min = 0.1
+    lin = lmfit.models.LinearModel(prefix='lin_')
+    lin_param_guess = lin.make_params()
+    lin_param_guess['lin_slope'].set(value=0, vary=False)
+    lin_param_guess['lin_intercept'].set(max=5, min=2)
+    # lin_param_guess['lin_intercept'].set(min=0, max=3)
+
+    model+=lin
+    params.update(lin_param_guess)
+    result = model.fit(y_win, params, x=x_win)
+    return result, x_win, y_win
+
+def fit_multiple_peaks(x, y, centroids, window=20.0, sigma_guess=1.0):
+    results = []
+    for c in centroids:
+        result, x_win, y_win = fit_peak_in_window(x, y, c, window, sigma_guess)
+        if result:
+            results.append({
+                'centroid_guess': c,
+                'result': result,
+                'x_win':x_win,
+                'y_win':y_win-2
+            })
+    return results
+
 numSpectra = len(spectraFiles)
 fig = plt.figure()
 ax = plt.gca()
 #Bin center (eV),Counts per 2 eV bin
 verticalBuffer = 1000
-startInd = 2500
+startInd = 6000
 #xs = np.arange(800, 13000, 2.)
 for i, spectrumFile in enumerate(spectraFiles):
   spectrum= pd.read_csv(spectrumFile, delimiter=",")
@@ -81,8 +133,6 @@ plt.legend()
 fig = plt.figure()
 ax = plt.gca()
 #Bin center (eV),Counts per 2 eV bin
-verticalBuffer = 1000
-startInd = 3500
 #xs = np.arange(800, 13000, 2.)
 cmap=plt.get_cmap("brg", len(spectraFiles))
 
@@ -109,7 +159,7 @@ for i, spectrumFile in enumerate(spectraFiles):
   counts = np.array(spectrum["Counts per 2 eV bin"].to_list())[startInd:]
   countsNorm = counts*(verticalBuffer/max(counts))
   ax.plot(xs, countsNorm-elemScale*verticalBuffer, label=str(spectraFiles[i]).split('/')[-1][:-4], color=color)
-  if centroidLit:
+  if centroidLit and False:
     multiGaussFit, multiGaussModel = fit_multiple_gaussians(x=xs, y=counts+3, centroids=centroidLit) #i add 1 to counts because least squares doesnt do well with low counts(galen?)
     fits[str(spectraFiles[i]).split('/')[-1][:-4]]=[multiGaussFit, multiGaussModel]
     # Create a finer x-grid for a smoother fit curve
@@ -143,5 +193,44 @@ for i, spectrumFile in enumerate(spectraFiles):
     plt.xlabel('X')
     plt.ylabel('Y')
     plt.grid(True)
+  if centroidLit:
+    plt.figure(figsize=(10, 6))
+    plt.plot(xs, counts, label='Full Spectrum', alpha=0.4)
+    fit_results = fit_multiple_peaks(xs,counts+2,centroidLit)
+    for i, fit in enumerate(fit_results):
+        res = fit['result']
+        x_win = fit['x_win']
+        y_fit = res.best_fit
+        center = res.params['center'].value
+        center_err = res.params['center'].stderr
+        amp = res.params['amplitude'].value
 
+        # Plot local fit
+        plt.plot(x_win, y_fit, '--', label=f'Fit {i+1} (E{center:.2f})')
+        plt.axvline(centroidLit[i], color='blue', linestyle='--', alpha=0.6)
+
+        label = f"E={center:.2f}"
+        if center_err:
+            label += f" ± {center_err:.2f}"
+
+        plt.text(center, plt.ylim()[1]*0.75, label,
+                 rotation=45,
+                 verticalalignment='bottom',
+                 horizontalalignment='center',
+                 fontsize=9,
+                 color='blue')
+        label = f"B2012={centroidLit[i]:.2f}"
+        plt.text(center, plt.ylim()[1]*0.86, label,
+                 rotation=45,
+                 verticalalignment='bottom',
+                 horizontalalignment='center',
+                 fontsize=9,
+                 color='black')
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.title("Individual Gaussian Fits")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
 ax.legend()
