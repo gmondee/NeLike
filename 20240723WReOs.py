@@ -229,6 +229,30 @@ if True:
         writer.writerow(["Bin center (eV)", "Counts per 2 eV bin"])
         for row in rows:
             writer.writerow(row)
+    
+    ReBinCentersE, ReDataE = data.hist(np.arange(800, 13000, binsize), "energy", states="E_OFF")
+    rows = zip(ReBinCentersE, ReDataE)
+    with open("Re_E_20240723.txt", "w", newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["Bin center (eV)", "Counts per 2 eV bin"])
+        for row in rows:
+            writer.writerow(row)
+
+    ReBinCentersF, ReDataF = data.hist(np.arange(800, 13000, binsize), "energy", states="F_OFF")
+    rows = zip(ReBinCentersF, ReDataF)
+    with open("Re_F_20240723.txt", "w", newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["Bin center (eV)", "Counts per 2 eV bin"])
+        for row in rows:
+            writer.writerow(row)
+
+    CalBinCenters, CalData = data.hist(np.arange(800, 13000, binsize), "energy", states=statesDict["CalOn"])
+    rows = zip(CalBinCenters, CalData)
+    with open("CalOn_20240723.txt", "w", newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["Bin center (eV)", "Counts per 2 eV bin"])
+        for row in rows:
+            writer.writerow(row)
 
 data.plotHist(np.arange(800, 13000, 2.), "energy", states=statesDict["W_OFF"], coAddStates=True)
 plt.title("20240723 W")
